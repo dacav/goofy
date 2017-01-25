@@ -1,6 +1,8 @@
 .PHONY : all clean
 
-CPPFLAGS := -Wall -std=c++11
+CXXFLAGS := -Wall -std=c++11 $(shell pkg-config --cflags libevent)
+LDFLAGS := $(shell pkg-config --libs libevent)
+
 DIRS := $(shell find . -type d)
 FILES := $(foreach dir, $(DIRS), $(wildcard $(dir)/*.c) \
 		                         $(wildcard $(dir)/*.cpp))
@@ -10,12 +12,12 @@ OBJS := $(addsuffix .o, $(basename $(FILES)))
 APP := spg
 
 all: $(OBJS)
-	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(OBJS) -o $(APP)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) -o $(APP)
 
 clean:
 	rm -f $(OBJS) $(APP) $(OBJS:.o=.d)
 
 %.d: %.cpp
-	$(CXX) $(CPPFLAGS) -MM -MF $@ $<
+	$(CXX) $(CXXFLAGS) -MM -MF $@ $<
 
 -include $(OBJS:.o=.d)
