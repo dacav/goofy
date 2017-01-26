@@ -4,6 +4,8 @@
 #include <netinet/in.h>
 #include <string>
 
+#include "client.h"
+
 namespace spg
 {
     class Server
@@ -19,6 +21,8 @@ namespace spg
 
             const int domain;   // AF_INET, AF_INET6
             const int fd;
+
+            Client accept();
     };
 
 } // namespace spg

@@ -121,6 +121,37 @@ namespace spg
         throw Error(std::string("Unrecognized address: ") + bind_addr);
     }
 
+    Client Server::accept()
+    {
+        struct sockaddr_storage storage;
+        socklen_t socklen = sizeof storage;
+
+        int clfd = ::accept(
+            fd,
+            reinterpret_cast<struct sockaddr *>(&storage),
+            &socklen
+        );
+
+        if (clfd == -1) {
+            throw Error("accept", errno);
+        }
+
+        if (domain == AF_INET) {
+            return Client(
+                reinterpret_cast<struct sockaddr_in &>(storage),
+                clfd
+            );
+        }
+        if (domain == AF_INET6) {
+            return Client(
+                reinterpret_cast<struct sockaddr_in6 &>(storage),
+                clfd
+            );
+        }
+
+        assert(false);
+    }
+
     Server::~Server()
     {
         close(fd);
