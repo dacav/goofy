@@ -4,13 +4,17 @@
 #include <iostream>
 #include <event2/event.h>
 
+#include <unistd.h> // tmp, use for write
+
 namespace
 {
     void cb_accept(evutil_socket_t fd, short what, void *arg)
     {
         spg::Server &srv = *reinterpret_cast<spg::Server *>(arg);
 
-        std::cerr << "Got connect on " << &srv << std::endl;
+        spg::Client cl = srv.accept();
+        const char hi[] = "hello world\n";
+        write(cl.fd, hi, sizeof hi);
     }
 
     void main_loop (spg::Server &srv, event_base *base)
