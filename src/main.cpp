@@ -41,8 +41,6 @@ int main(int argc, char **argv)
 {
     spg::Server srv = spg::Server::parse_addr(argv[1], 8070, 8);
 
-    std::cerr << "go go gadget " << &srv << std::endl;
-
     event_base *base = event_base_new();
     main_loop(srv, base);
     event_base_free(base);
