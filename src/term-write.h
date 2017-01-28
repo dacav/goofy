@@ -1,5 +1,11 @@
 #pragma once
 
+/* This module exports stream operators for system-provides types.
+ *
+ * Stream operators for local types must be provided by the modules
+ * declaring them.
+ */
+
 #include <ostream>
 #include <arpa/inet.h>
 
