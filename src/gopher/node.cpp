@@ -23,9 +23,4 @@ namespace spg::gopher
         }
     }
 
-    NodeRepr::NodeRepr(const Node &n)
-        : node(n)
-    {
-    }
-
 }
