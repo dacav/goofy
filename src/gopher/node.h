@@ -19,9 +19,9 @@ namespace spg::gopher
     class Node {
         public:
             Node(NodeType type,
-                 const std::string display_name,
-                 const std::string selector,
-                 const std::string host,
+                 const std::string& display_name,
+                 const std::string& selector,
+                 const std::string& host,
                  uint16_t port);
 
             const char type;
