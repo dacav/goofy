@@ -1,6 +1,5 @@
 #include "node.h"
-
-#include <sstream>
+#include "proto.h"
 
 namespace spg::gopher
 {
@@ -23,4 +22,18 @@ namespace spg::gopher
         }
     }
 
+    void Node::repr(int fd) const
+    {
+        using spg::gopher::proto::write;
+        char t = type;
+        write(fd, &t, sizeof(t));
+
+        using spg::gopher::proto::writetb;
+        writetb(fd, display_name);
+        writetb(fd, selector);
+        writetb(fd, host);
+
+        using spg::gopher::proto::writeln;
+        writeln(fd, std::to_string(port));
+    }
 }

@@ -1,4 +1,5 @@
 #include "node-dirlist.h"
+#include "proto.h"
 
 #include <string>
 
@@ -17,14 +18,22 @@ namespace spg::gopher
     {
     }
 
-    const NodeDirList::NodeList NodeDirList::list_nodes() const
+    const std::list<std::shared_ptr<Node>>& NodeDirList::list_nodes() const
     {
         return nodes;
     }
 
-    void NodeDirList::insert(const NodeLink& item)
+    void NodeDirList::insert(const std::shared_ptr<Node>& item)
     {
         nodes.push_back(item);
     }
+
+    void NodeDirList::show(int fd) const
+    {
+        for (auto& sub : nodes) {
+            sub->repr(fd);
+        }
+    }
+
 }
 

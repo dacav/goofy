@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <string>
 #include <ostream>
 
@@ -31,17 +32,8 @@ namespace spg::gopher
             const std::string host;
             const uint16_t port;
 
+            virtual void repr(int fd) const;
+            virtual void show(int fd) const = 0;
     };
-
-    struct ProtoRepr {
-        const Node& node;
-        ProtoRepr(const Node& n) : node(n) {}
-    };
-
-    struct ProtoShow {
-        const Node& node;
-        ProtoShow(const Node& n) : node(n) {}
-    };
-
 
 }

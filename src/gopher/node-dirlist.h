@@ -9,21 +9,21 @@
 
 namespace spg::gopher
 {
-    class NodeDirList : public Node {
+    class NodeDirList : public Node
+    {
         public:
             NodeDirList(const std::string& display_name,
                         const std::string& selector,
                         const std::string& host,
                         uint16_t port);
 
-            using NodeLink = std::shared_ptr<spg::gopher::Node>;
-            using NodeList = std::list<NodeLink>;
+            const std::list<std::shared_ptr<Node>>& list_nodes() const;
+            void insert(const std::shared_ptr<Node>& item);
 
-            const NodeList list_nodes() const;
-            void insert(const NodeLink& item);
+            virtual void show(int fd) const override;
 
         private:
-            NodeList nodes;
+            std::list<std::shared_ptr<Node>> nodes;
 
     };
 }

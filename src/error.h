@@ -19,4 +19,12 @@ namespace spg
             {}
     };
 
+    class IOError : public Error
+    {
+        public:
+            IOError(const std::string &msg, int e)
+                : Error(msg, e)
+            {}
+    };
+
 }
