@@ -34,15 +34,8 @@ namespace spg::gopher::proto
         write(fd, "\r\n", 2);
     }
 
-    void writetb(int fd, const char* bytes, size_t len)
+    void writedone(int fd)
     {
-        write(fd, bytes, len);
-        write(fd, "\t", 1);
-    }
-
-    void writetb(int fd, const std::string& str)
-    {
-        write(fd, str);
-        write(fd, "\t", 1);
+        write(fd, "\r\n.\r\n", 5);
     }
 }
