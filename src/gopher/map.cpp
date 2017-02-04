@@ -13,31 +13,36 @@ namespace spg::gopher
     {
     }
 
-    const Map::NodeLink& Map::insert(Node* item)
+    const size_t Map::max_selector_length() const
     {
-        const std::string& selector = item->selector;
-
-        auto position = nodes.find(selector);
-        if (position != nodes.end()) {
-            std::ostringstream err;
-            err << "Duplicated selector for "
-                << *item << " and " << *(position->second);
-            throw MapError(err.str());
-        }
-
-        std::shared_ptr<Node>& ptr = nodes[selector];
-        ptr.reset(item);
-        maxlen = std::max(selector.length(), maxlen);
-
-        return ptr;
+        return maxlen;
     }
 
-    Map::NodeLink Map::lookup(const std::string& selector)
+    std::unique_ptr<Node>& Map::insert(Node *item)
     {
-        auto position = nodes.find(selector);
-        if (position == nodes.end()) {
-            return nullptr;
+        const std::string &selector = item->selector;
+        decltype(nodes)::iterator ins;
+        bool success;
+
+        std::tie(ins, success) = nodes.emplace(selector, item);
+
+        if (success) {
+            maxlen = std::max(selector.length(), maxlen);
+            return ins->second;
         }
-        return position->second;
+        else {
+            MapError e(selector);
+            delete item;
+            throw e;
+        }
+    }
+
+    Node& Map::lookup(const std::string& selector) const
+    {
+        auto ptr = nodes.find(selector);
+        if (ptr == nodes.end()) {
+            throw LookupFailure(selector);
+        }
+        return *(ptr->second);
     }
 }

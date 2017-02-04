@@ -5,7 +5,8 @@
 
 namespace spg::gopher
 {
-    NodeDirList::NodeDirList(const std::string& display_name,
+    NodeDirList::NodeDirList(const Map &m,
+                             const std::string& display_name,
                              const std::string& selector,
                              const std::string& host,
                              uint16_t port)
@@ -15,23 +16,30 @@ namespace spg::gopher
             selector,
             host,
             port)
+        , map(m)
     {
     }
 
-    const std::list<std::shared_ptr<Node>>& NodeDirList::list_nodes() const
+    void NodeDirList::insert(const Node& item)
     {
-        return nodes;
+        subs.push_back(item.selector);
     }
 
-    void NodeDirList::insert(const std::shared_ptr<Node>& item)
+    void NodeDirList::show(int fd)
     {
-        nodes.push_back(item);
-    }
+        using spg::gopher::proto::writeln;
 
-    void NodeDirList::show(int fd) const
-    {
-        for (auto& sub : nodes) {
-            sub->repr(fd);
+        auto end = subs.cend();
+        auto i = subs.begin();
+
+        while (i != end) {
+            try {
+                writeln(fd, map.lookup(*i).repr);
+                i ++;
+            }
+            catch (LookupFailure &e) {
+                i = subs.erase(i);
+            }
         }
     }
 

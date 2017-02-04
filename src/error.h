@@ -7,7 +7,6 @@
 
 namespace spg
 {
-
     class Error : public std::runtime_error
     {
         public:
@@ -18,13 +17,4 @@ namespace spg
                 : std::runtime_error(when + ": " + std::strerror(e))
             {}
     };
-
-    class IOError : public Error
-    {
-        public:
-            IOError(const std::string &msg, int e)
-                : Error(msg, e)
-            {}
-    };
-
 }

@@ -1,5 +1,4 @@
 #include "proto.h"
-#include "../error.h"
 
 #include <unistd.h>
 #include <cerrno>
@@ -11,7 +10,7 @@ namespace spg::gopher::proto
         while (len > 0) {
             ssize_t n = ::write(fd, bytes, len);
             if (n < 0) {
-                throw spg::IOError("write", errno);
+                throw IOError("write", errno);
             }
             bytes += n;
             len -= n;

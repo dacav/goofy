@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <string>
-#include <ostream>
 
 #include "../error.h"
 
@@ -25,6 +24,7 @@ namespace spg::gopher
                  const std::string& selector,
                  const std::string& host,
                  uint16_t port);
+            virtual ~Node();
 
             const char type;
             const std::string display_name;
@@ -32,8 +32,9 @@ namespace spg::gopher
             const std::string host;
             const uint16_t port;
 
-            virtual void repr(int fd) const;
-            virtual void show(int fd) const = 0;
+            const std::string repr;
+
+            virtual void show(int fd) = 0;
     };
 
 }

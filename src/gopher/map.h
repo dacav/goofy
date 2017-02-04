@@ -12,7 +12,19 @@ namespace spg::gopher
 {
     class MapError : public spg::Error {
         public:
-            MapError(const std::string msg) : spg::Error(msg) {}
+            MapError(const std::string msg)
+                : spg::Error(msg) {}
+    };
+
+    class Duplicated : public MapError {
+        Duplicated(const std::string& selector)
+            : MapError(std::string("Duplicated selector: ") + selector) {}
+    };
+
+    class LookupFailure : public MapError {
+        public:
+            LookupFailure(const std::string& selector)
+                : MapError(selector) {}
     };
 
     class Map
@@ -20,17 +32,22 @@ namespace spg::gopher
         public:
             Map();
 
-            using NodeLink = std::shared_ptr<spg::gopher::Node>;
-
-            const NodeLink& insert(Node* item);
-            NodeLink lookup(const std::string& sel);
-
-            const size_t max_selector_length() const {
-                return maxlen;
+            template <typename NodeT, typename... Args>
+            NodeT& mknode(Args&&... args)
+            {
+                NodeT *node = new NodeT(*this, args...);
+                return dynamic_cast<NodeT &>(
+                    *insert(dynamic_cast<Node*>(node))
+                );
             }
 
+            const size_t max_selector_length() const;
+
+            Node& lookup(const std::string& selector) const;
+
         private:
-            std::map<std::string, NodeLink> nodes;
+            std::map<std::string, std::unique_ptr<Node>> nodes;
             size_t maxlen;
+            std::unique_ptr<Node>& insert(Node *item);
     };
 }

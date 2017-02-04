@@ -1,6 +1,7 @@
 #pragma once
 
 #include "node.h"
+#include "map.h"
 
 #include <string>
 #include <list>
@@ -12,18 +13,18 @@ namespace spg::gopher
     class NodeDirList : public Node
     {
         public:
-            NodeDirList(const std::string& display_name,
+            NodeDirList(const Map& map,
+                        const std::string& display_name,
                         const std::string& selector,
                         const std::string& host,
                         uint16_t port);
 
-            const std::list<std::shared_ptr<Node>>& list_nodes() const;
-            void insert(const std::shared_ptr<Node>& item);
+            void insert(const Node& item);
 
-            virtual void show(int fd) const override;
+            virtual void show(int fd) override;
 
         private:
-            std::list<std::shared_ptr<Node>> nodes;
-
+            const Map& map;
+            std::list<std::string> subs;
     };
 }
