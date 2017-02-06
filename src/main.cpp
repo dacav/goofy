@@ -1,5 +1,4 @@
 #include "error.h"
-#include "server.h"
 
 #include "gopher/node-dirlist.h"
 #include "gopher/node-term-write.h"
