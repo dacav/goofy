@@ -5,9 +5,11 @@
 #include "gopher/map.h"
 
 #include "parse/ip.h"
+#include "session.h"
 
 #include <iostream>
 #include <map>
+#include <list>
 #include <memory>
 #include <sstream>
 #include <cassert>
@@ -20,94 +22,22 @@
 
 namespace
 {
-    struct GlobalContext;
-
-    struct SessionContext
-    {
-        GlobalContext& globals;
-
-        using Event = std::unique_ptr<struct event, void(*)(struct event *)>;
-        Event ev_read;
-        Event ev_write;
-
-        static void cb_read(int clsock, short what, void *arg)
-        {
-            //SessionContext& context = *reinterpret_cast<SessionContext*>(arg);
-            std::cerr << "Reading from you..." << std::endl;
-
-            assert(!(what & (EV_WRITE | EV_SIGNAL)));
-            if (what & EV_READ) {
-                char buffer[512];
-                memset(buffer, 0, sizeof buffer);
-                recv(clsock, buffer, sizeof(buffer) - 1, 0);
-                std::cerr << buffer << std::endl;
-            }
-            else if (what & EV_TIMEOUT) {
-            }
-        }
-
-        static void cb_write(int clsock, short what, void *arg)
-        {
-            //SessionContext& context = *reinterpret_cast<SessionContext*>(arg);
-            std::cerr << "Writing to you..." << std::endl;
-
-            assert(!(what & (EV_READ | EV_SIGNAL)));
-            if (what & EV_WRITE) {
-                send(clsock, "hi there\n", strlen("hi there\n"), 0);
-            }
-            else if (what & EV_TIMEOUT) {
-            }
-        }
-
-        SessionContext(GlobalContext &gc, int clsock);
-    };
-
     struct GlobalContext
     {
         spg::gopher::Map map;
         std::unique_ptr<struct event_base, void(*)(struct event_base*)> base_event;
-        std::list<SessionContext> sessions;
+        std::list<spg::session::Session> sessions;
 
         GlobalContext()
             : base_event(event_base_new(), event_base_free)
         {}
 
-        SessionContext& new_session(int clsock)
+        spg::session::Session& new_session(int clsock)
         {
-            sessions.emplace_back(*this, clsock);
+            sessions.emplace_back(base_event.get(), clsock);
             return sessions.back();
         }
     };
-
-    SessionContext::SessionContext(GlobalContext& gc, int clsock) :
-        globals(gc),
-        ev_read(
-            event_new(
-                globals.base_event.get(),
-                clsock,
-                EV_READ | EV_PERSIST | EV_TIMEOUT,
-                SessionContext::cb_read,
-                this
-            ),
-            event_free
-        ),
-        ev_write(
-            event_new(
-                globals.base_event.get(),
-                clsock,
-                EV_WRITE | EV_PERSIST | EV_TIMEOUT,
-                SessionContext::cb_write,
-                this
-            ),
-            event_free
-        )
-    {
-        const timeval* timeout = nullptr;
-        std::cerr << "Adding" << std::endl;
-        if (event_add(ev_read.get(), timeout) == -1) {
-            std::cerr << "Cannot add? " << strerror(errno) << std::endl;
-        }
-    }
 
     void cb_accept(
             struct evconnlistener* listener,

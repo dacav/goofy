@@ -1,0 +1,25 @@
+#pragma once
+
+#include <iostream> // possibly dropme
+
+#include <event2/event.h>
+#include <memory>
+
+namespace spg::session
+{
+
+    class Session
+    {
+        public:
+            Session(struct event_base*, int clsock);
+
+        private:
+            using Event = std::unique_ptr<struct event, void(*)(struct event *)>;
+            Event ev_read;
+            Event ev_write;
+
+            static void cb_read(int clsock, short what, void *arg);
+            static void cb_write(int clsock, short what, void *arg);
+    };
+
+} // namespace session
