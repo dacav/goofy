@@ -10,6 +10,7 @@
 #include <map>
 #include <memory>
 #include <sstream>
+#include <cassert>
 
 #include <event2/event.h>
 #include <event2/listener.h>
@@ -17,13 +18,96 @@
 #include <unistd.h> // tmp, use for write
 #include <ext/stdio_filebuf.h>
 
-struct GlobalContext
-{
-    spg::gopher::Map map;
-};
-
 namespace
 {
+    struct GlobalContext;
+
+    struct SessionContext
+    {
+        GlobalContext& globals;
+
+        using Event = std::unique_ptr<struct event, void(*)(struct event *)>;
+        Event ev_read;
+        Event ev_write;
+
+        static void cb_read(int clsock, short what, void *arg)
+        {
+            //SessionContext& context = *reinterpret_cast<SessionContext*>(arg);
+            std::cerr << "Reading from you..." << std::endl;
+
+            assert(!(what & (EV_WRITE | EV_SIGNAL)));
+            if (what & EV_READ) {
+                char buffer[512];
+                memset(buffer, 0, sizeof buffer);
+                recv(clsock, buffer, sizeof(buffer) - 1, 0);
+                std::cerr << buffer << std::endl;
+            }
+            else if (what & EV_TIMEOUT) {
+            }
+        }
+
+        static void cb_write(int clsock, short what, void *arg)
+        {
+            //SessionContext& context = *reinterpret_cast<SessionContext*>(arg);
+            std::cerr << "Writing to you..." << std::endl;
+
+            assert(!(what & (EV_READ | EV_SIGNAL)));
+            if (what & EV_WRITE) {
+                send(clsock, "hi there\n", strlen("hi there\n"), 0);
+            }
+            else if (what & EV_TIMEOUT) {
+            }
+        }
+
+        SessionContext(GlobalContext &gc, int clsock);
+    };
+
+    struct GlobalContext
+    {
+        spg::gopher::Map map;
+        std::unique_ptr<struct event_base, void(*)(struct event_base*)> base_event;
+        std::list<SessionContext> sessions;
+
+        GlobalContext()
+            : base_event(event_base_new(), event_base_free)
+        {}
+
+        SessionContext& new_session(int clsock)
+        {
+            sessions.emplace_back(*this, clsock);
+            return sessions.back();
+        }
+    };
+
+    SessionContext::SessionContext(GlobalContext& gc, int clsock) :
+        globals(gc),
+        ev_read(
+            event_new(
+                globals.base_event.get(),
+                clsock,
+                EV_READ | EV_PERSIST | EV_TIMEOUT,
+                SessionContext::cb_read,
+                this
+            ),
+            event_free
+        ),
+        ev_write(
+            event_new(
+                globals.base_event.get(),
+                clsock,
+                EV_WRITE | EV_PERSIST | EV_TIMEOUT,
+                SessionContext::cb_write,
+                this
+            ),
+            event_free
+        )
+    {
+        const timeval* timeout = nullptr;
+        std::cerr << "Adding" << std::endl;
+        if (event_add(ev_read.get(), timeout) == -1) {
+            std::cerr << "Cannot add? " << strerror(errno) << std::endl;
+        }
+    }
 
     void cb_accept(
             struct evconnlistener* listener,
@@ -32,7 +116,7 @@ namespace
             int claddrlen,
             void *context)
     {
-        std::cerr << "Connected yo " << clsocket << std::endl;
+        reinterpret_cast<GlobalContext*>(context)->new_session(clsocket);
     }
 
     void cb_accept_err(
@@ -59,27 +143,23 @@ int main(int argc, char **argv)
         ip = argv[0];
     }
 
-    GlobalContext context;
+    GlobalContext globals;
     {
         using namespace spg::gopher;
-        auto& root = context.map.mknode<NodeDirList>("root", "", ip, port);
-        auto& l1 = context.map.mknode<NodeDirList>("le boobs", "le/boobs", ip, port);
-        auto& l2 = context.map.mknode<NodeDirList>("le boobies", "le/boobies", ip, port);
+        auto& root = globals.map.mknode<NodeDirList>("root", "", ip, port);
+        auto& l1 = globals.map.mknode<NodeDirList>("le boobs", "le/boobs", ip, port);
+        auto& l2 = globals.map.mknode<NodeDirList>("le boobies", "le/boobies", ip, port);
         root.insert(l1);
         l1.insert(l2);
         l2.insert(l1);
     }
 
     struct sockaddr_storage addr_storage;
-    std::unique_ptr<struct event_base, void(*)(struct event_base*)> base(
-        event_base_new(),
-        event_base_free
-    );
     std::unique_ptr<struct evconnlistener, void(*)(struct evconnlistener*)> listener(
         evconnlistener_new_bind(
-            base.get(),
+            globals.base_event.get(),
             cb_accept,
-            &context,
+            &globals,
             LEV_OPT_CLOSE_ON_FREE | unsigned(sock_reusable) * LEV_OPT_REUSEABLE,
             backlog,
             spg::parse::ipaddr(addr_storage, ip, port),
@@ -95,7 +175,7 @@ int main(int argc, char **argv)
     }
 
     // todo: stderr of libevent
-    switch (event_base_dispatch(base.get())) {
+    switch (event_base_dispatch(globals.base_event.get())) {
         case -1: // error
             std::cerr << "error from libevent" << std::endl;
             exit(EXIT_FAILURE);
