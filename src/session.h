@@ -11,10 +11,15 @@ namespace spg::session
     class Session
     {
         public:
-            Session(struct event_base*, int clsock);
+            Session(struct event_base*, unsigned session_id, int clsock);
+            const unsigned session_id;
 
         private:
-            using Event = std::unique_ptr<struct event, void(*)(struct event *)>;
+            using Event = std::unique_ptr<
+                struct event,
+                void(*)(struct event *)
+            >;
+
             Event ev_read;
             Event ev_write;
 

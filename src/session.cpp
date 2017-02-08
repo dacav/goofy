@@ -7,7 +7,11 @@
 namespace spg::session
 {
 
-    Session::Session(struct event_base *base_event, int clsock) :
+    Session::Session(
+            struct event_base *base_event,
+            unsigned sid,
+            int clsock) :
+        session_id(sid),
         ev_read(
             event_new(
                 base_event,

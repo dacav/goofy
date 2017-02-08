@@ -13,6 +13,7 @@
 #include <memory>
 #include <sstream>
 #include <cassert>
+#include <utility>
 
 #include <event2/event.h>
 #include <event2/listener.h>
@@ -24,8 +25,13 @@ namespace
 {
     struct GlobalContext
     {
+        using EventBase = std::unique_ptr<
+            struct event_base,
+            void(*)(struct event_base*)
+        >;
+
         spg::gopher::Map map;
-        std::unique_ptr<struct event_base, void(*)(struct event_base*)> base_event;
+        EventBase base_event;
         std::list<spg::session::Session> sessions;
 
         GlobalContext()
@@ -34,7 +40,8 @@ namespace
 
         spg::session::Session& new_session(int clsock)
         {
-            sessions.emplace_back(base_event.get(), clsock);
+            const unsigned next_id = sessions.size();
+            sessions.emplace_back(base_event.get(), next_id, clsock);
             return sessions.back();
         }
     };
