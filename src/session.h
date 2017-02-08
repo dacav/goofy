@@ -14,6 +14,11 @@ namespace spg::session
             Session(struct event_base*, unsigned session_id, int clsock);
             const unsigned session_id;
 
+            Session(Session&&);
+            Session(const Session&) = delete;
+            void operator=(const Session&) = delete;
+            void operator=(Session&&) = delete;
+
         private:
             using Event = std::unique_ptr<
                 struct event,

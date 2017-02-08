@@ -32,7 +32,7 @@ namespace
 
         spg::gopher::Map map;
         EventBase base_event;
-        std::list<spg::session::Session> sessions;
+        std::map<unsigned, spg::session::Session> sessions;
 
         GlobalContext()
             : base_event(event_base_new(), event_base_free)
@@ -41,8 +41,12 @@ namespace
         spg::session::Session& new_session(int clsock)
         {
             const unsigned next_id = sessions.size();
-            sessions.emplace_back(base_event.get(), next_id, clsock);
-            return sessions.back();
+            auto out = sessions.emplace(std::make_pair(
+                next_id,
+                spg::session::Session(base_event.get(), next_id, clsock)
+            ));
+            assert(out.second);
+            return out.first->second;
         }
     };
 

@@ -40,6 +40,12 @@ namespace spg::session
         }
     }
 
+    Session::Session(Session&& oth) :
+        session_id(oth.session_id),
+        ev_read(std::move(oth.ev_read)),
+        ev_write(std::move(oth.ev_write))
+    {
+    }
 
     void Session::cb_read(int clsock, short what, void *arg)
     {
