@@ -4,6 +4,8 @@
 #include <cstring>
 #include <cassert>
 
+#include <iostream>
+
 namespace spg::session
 {
 
@@ -16,7 +18,7 @@ namespace spg::session
             event_new(
                 base_event,
                 clsock,
-                EV_READ | EV_PERSIST | EV_TIMEOUT,
+                EV_READ | EV_TIMEOUT,
                 Session::cb_read,
                 this
             ),
@@ -31,7 +33,8 @@ namespace spg::session
                 this
             ),
             event_free
-        )
+        ),
+        reader(*this)
     {
         const timeval* timeout = nullptr;
         std::cerr << "Adding" << std::endl;
@@ -40,27 +43,30 @@ namespace spg::session
         }
     }
 
-    Session::Session(Session&& oth) :
-        session_id(oth.session_id),
-        ev_read(std::move(oth.ev_read)),
-        ev_write(std::move(oth.ev_write))
-    {
-    }
-
     void Session::cb_read(int clsock, short what, void *arg)
     {
-        //Session& context = *reinterpret_cast<Session*>(arg);
-        std::cerr << "Reading from you..." << std::endl;
-
+        Session& session = *reinterpret_cast<Session*>(arg);
         assert(!(what & (EV_WRITE | EV_SIGNAL)));
         if (what & EV_READ) {
-            char buffer[512];
-            memset(buffer, 0, sizeof buffer);
-            recv(clsock, buffer, sizeof(buffer) - 1, 0);
-            std::cerr << buffer << std::endl;
+            session.reader.read(clsock);
         }
         else if (what & EV_TIMEOUT) {
         }
+    }
+
+    void Session::got_line(const char *line, size_t len)
+    {
+        std::cerr << "Got line: " << line
+            << " len " << len
+            << std::endl;
+        if (event_add(ev_read.get(), NULL) == -1) {
+            std::cerr << "Cannot add again? " << strerror(errno) << std::endl;
+        }
+    }
+
+    void Session::got_eof()
+    {
+        std::cerr << "End of file" << std::endl;
     }
 
     void Session::cb_write(int clsock, short what, void *arg)
