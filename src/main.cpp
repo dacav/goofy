@@ -42,7 +42,12 @@ namespace
         {
             const unsigned next_id = sessions.size();
             std::unique_ptr<spg::session::Session> session(
-                new spg::session::Session(base_event.get(), next_id, clsock)
+                new spg::session::Session(
+                    base_event.get(),
+                    next_id,
+                    clsock,
+                    map
+                )
             );
             auto out = sessions.emplace(next_id, std::move(session));
             assert(out.second);

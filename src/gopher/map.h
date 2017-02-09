@@ -32,6 +32,11 @@ namespace spg::gopher
         public:
             Map();
 
+            Map(const Map&) = delete;
+            Map(Map&&) = delete;
+            void operator=(const Map&) = delete;
+            void operator=(Map&&) = delete;
+
             template <typename NodeT, typename... Args>
             NodeT& mknode(Args&&... args)
             {

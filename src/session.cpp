@@ -15,8 +15,11 @@ namespace spg::session
     Session::Session(
             struct event_base *base_event,
             unsigned sid,
-            int clsock) :
+            int sock,
+            spg::gopher::Map& map) :
         session_id(sid),
+        gopher_map(map),
+        clsock(sock),
         ev_read(
             event_new(
                 base_event,
@@ -55,8 +58,7 @@ namespace spg::session
         }
         else if (what & EV_TIMEOUT) {
             std::cerr << "Timed out!" << std::endl;
-            event_del(session.ev_read.get()); // here detach session
-            shutdown(clsock, SHUT_RDWR);
+            session.close();
         }
     }
 
@@ -64,14 +66,20 @@ namespace spg::session
     {
         event_del(ev_read.get());
         std::cerr << "Got query: " << std::string(line, len) << std::endl;
-        //if (event_add(ev_read.get(), NULL) == -1) {
-        //    std::cerr << "Cannot add again? " << strerror(errno) << std::endl;
-        //}
+        try {
+            gopher_map.lookup(std::string(line, len)).show(clsock);
+            spg::gopher::proto::writedone(clsock);
+        }
+        catch (spg::gopher::LookupFailure& e) {
+            std::cerr << "Not found bawww" << std::endl;
+            close();
+        }
     }
 
     void Session::got_eof()
     {
         std::cerr << "End of file" << std::endl;
+        close();
     }
 
     void Session::cb_write(int clsock, short what, void *arg)
@@ -85,6 +93,12 @@ namespace spg::session
         }
         else if (what & EV_TIMEOUT) {
         }
+    }
+
+    void Session::close()
+    {
+        event_del(ev_read.get()); // here detach session. How?
+        ::shutdown(clsock, SHUT_RDWR);
     }
 
 } // namespace session

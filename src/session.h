@@ -6,13 +6,20 @@
 #include <cstddef>
 
 #include "gopher/proto.h"
+#include "gopher/map.h"
 
 namespace spg::session
 {
     class Session
     {
         public:
-            Session(struct event_base*, unsigned session_id, int clsock);
+            Session(
+                struct event_base*,
+                unsigned session_id,
+                int clsock,
+                spg::gopher::Map& map
+            );
+
             const unsigned session_id;
 
             Session(Session&&) = delete;
@@ -21,11 +28,13 @@ namespace spg::session
             void operator=(Session&&) = delete;
 
         private:
+            spg::gopher::Map& gopher_map;
+            int clsock;
+
             using Event = std::unique_ptr<
                 struct event,
                 void(*)(struct event *)
             >;
-
             Event ev_read;
             Event ev_write;
 
@@ -34,6 +43,8 @@ namespace spg::session
 
             void got_line(const char *line, size_t len);
             void got_eof();
+
+            void close();
 
             gopher::proto::Reader<
                 256ul,    // bytes
