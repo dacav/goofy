@@ -78,8 +78,9 @@ namespace spg::session
         event_del(ev_read.get());
         std::cerr << "Got query: " << std::string(line, len) << std::endl;
         try {
-            gopher_map.lookup(std::string(line, len)).show(clsock);
-            spg::gopher::proto::writedone(clsock);
+            // WORK IN PROGRESS: async send of generic nodes
+            //gopher_map.lookup(std::string(line, len)).show(clsock);
+            //spg::gopher::proto::writedone(clsock);
         }
         catch (spg::gopher::LookupFailure& e) {
             close();

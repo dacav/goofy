@@ -28,14 +28,15 @@ namespace spg::gopher
 
     void NodeDirList::show(int fd)
     {
-        using spg::gopher::proto::writeln;
+        //using spg::gopher::proto::writeln;
 
         auto end = subs.cend();
         auto i = subs.begin();
 
         while (i != end) {
             try {
-                writeln(fd, map.lookup(*i).repr);
+                // TODO: how do we send async?
+                //writeln(fd, map.lookup(*i).repr);
                 i ++;
             }
             catch (LookupFailure &e) {

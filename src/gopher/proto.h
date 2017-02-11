@@ -22,17 +22,23 @@ namespace spg::gopher::proto
      */
     size_t read(int fd, void *buffer, size_t len);
 
+    /* Minimal wrapper for unix's write: writes at most len bytes from
+     * buffer, returns the actual amount of bytes written, throws IOError in
+     * case of error.
+     */
+    size_t write(int fd, const void* buffer, size_t len);
+
     /* Stateful reader class */
     template <
         size_t Size,
-        typename Listener,
-        void (Listener::*GotLine)(const char *data, size_t size),
-        void (Listener::*GotEof)()
+        typename ListenerT,
+        void (ListenerT::*GotLine)(const char *data, size_t size),
+        void (ListenerT::*GotEof)()
     >
     class Reader
     {
         public:
-            Reader(Listener& lst)
+            Reader(ListenerT& lst)
                 : listener(lst)
                 , cursor(0)
             {
@@ -75,16 +81,8 @@ namespace spg::gopher::proto
                 cursor = 0;
             }
 
-            Listener& listener;
+            ListenerT& listener;
             std::array<char, Size> buffer;
             size_t cursor;
     };
-
-    void write(int fd, const char* bytes, size_t len);
-    void write(int fd, const std::string& str);
-
-    void writeln(int fd, const char* bytes, size_t len);
-    void writeln(int fd, const std::string& str);
-
-    void writedone(int fd);
 }
