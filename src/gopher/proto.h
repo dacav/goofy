@@ -46,6 +46,9 @@ namespace spg::gopher::proto
                 size_t size = spg::gopher::proto::read(fd, start, room);
 
                 if (size == 0) {
+                    if (cursor > 0) {
+                        (listener.*GotLine)(&buffer[0], cursor);
+                    }
                     (listener.*GotEof)();
                     reset();
                     return;
