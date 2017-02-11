@@ -9,14 +9,15 @@ namespace spg::gopher
                              const std::string& display_name,
                              const std::string& selector,
                              const std::string& host,
-                             uint16_t port)
-        : Node(
+                             uint16_t port) :
+        Node(
             NodeType::NT_DIRLIST,
             display_name,
             selector,
             host,
-            port)
-        , map(m)
+            port
+        ),
+        map(m)
     {
     }
 
