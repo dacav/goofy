@@ -8,7 +8,7 @@
 #include "session.h"
 
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <list>
 #include <memory>
 #include <sstream>
@@ -25,28 +25,40 @@ namespace
 {
     struct GlobalContext
     {
+        spg::gopher::Map gopher_map;
+
         using EventBase = std::unique_ptr<
             struct event_base,
             void(*)(struct event_base*)
         >;
-
-        spg::gopher::Map map;
         EventBase base_event;
-        std::map<unsigned, std::unique_ptr<spg::session::Session>> sessions;
+
+        using SessionMap = std::unordered_map<
+            unsigned,
+            std::unique_ptr<spg::session::Session>
+        >;
+        SessionMap sessions;
 
         GlobalContext()
             : base_event(event_base_new(), event_base_free)
         {}
 
+        void drop_session(unsigned session_id)
+        {
+            std::cerr << "kaboom " << session_id;
+        }
+
         spg::session::Session& new_session(int clsock)
         {
+            using namespace std::placeholders;
+
             const unsigned next_id = sessions.size();
             std::unique_ptr<spg::session::Session> session(
                 new spg::session::Session(
-                    base_event.get(),
-                    next_id,
+                    gopher_map,
+                    std::bind(&GlobalContext::drop_session, this, next_id),
                     clsock,
-                    map
+                    base_event.get()
                 )
             );
             auto out = sessions.emplace(next_id, std::move(session));
@@ -62,7 +74,13 @@ namespace
             int claddrlen,
             void *context)
     {
-        reinterpret_cast<GlobalContext*>(context)->new_session(clsocket);
+        try {
+            reinterpret_cast<GlobalContext*>(context)->new_session(clsocket);
+        }
+        catch (spg::session::SessionError& error) {
+            std::cerr << "Creating session: "
+                << error.what() << std::endl;
+        }
     }
 
     void cb_accept_err(
@@ -92,9 +110,9 @@ int main(int argc, char **argv)
     GlobalContext globals;
     {
         using namespace spg::gopher;
-        auto& root = globals.map.mknode<NodeDirList>("root", "", ip, port);
-        auto& l1 = globals.map.mknode<NodeDirList>("le boobs", "le/boobs", ip, port);
-        auto& l2 = globals.map.mknode<NodeDirList>("le boobies", "le/boobies", ip, port);
+        auto& root = globals.gopher_map.mknode<NodeDirList>("root", "", ip, port);
+        auto& l1 = globals.gopher_map.mknode<NodeDirList>("le boobs", "le/boobs", ip, port);
+        auto& l2 = globals.gopher_map.mknode<NodeDirList>("le boobies", "le/boobies", ip, port);
         root.insert(l1);
         l1.insert(l2);
         l2.insert(l1);

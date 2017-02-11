@@ -13,12 +13,12 @@ namespace spg::session
 {
 
     Session::Session(
-            struct event_base *base_event,
-            unsigned sid,
+            spg::gopher::Map& map,
+            const DropCallback& drop_cb,
             int sock,
-            spg::gopher::Map& map) :
-        session_id(sid),
+            struct event_base *base_event) :
         gopher_map(map),
+        drop_callback(drop_cb),
         clsock(sock),
         ev_read(
             event_new(
@@ -42,11 +42,22 @@ namespace spg::session
         ),
         reader(*this)
     {
-        const timeval timeout = {5, 1};
-        std::cerr << "Adding" << std::endl;
-        if (event_add(ev_read.get(), &timeout) == -1) {
-            std::cerr << "Cannot add? " << strerror(errno) << std::endl;
+        if (clsock < 0) {
+            throw SessionError("Invalid client socket");
         }
+
+        const timeval timeout = {5, 1}; // here by conf.
+        if (event_add(ev_read.get(), &timeout) == -1) {
+            throw SessionError("Adding event", errno);
+        }
+    }
+
+    void Session::close()
+    {
+        event_del(ev_read.get());
+        ::shutdown(clsock, SHUT_RDWR);
+        clsock = -1;
+        drop_callback();
     }
 
     void Session::cb_read(int clsock, short what, void *arg)
@@ -71,7 +82,6 @@ namespace spg::session
             spg::gopher::proto::writedone(clsock);
         }
         catch (spg::gopher::LookupFailure& e) {
-            std::cerr << "Not found bawww" << std::endl;
             close();
         }
     }
@@ -79,7 +89,6 @@ namespace spg::session
     void Session::got_eof()
     {
         std::cerr << "End of file" << std::endl;
-        close();
     }
 
     void Session::cb_write(int clsock, short what, void *arg)
@@ -89,16 +98,9 @@ namespace spg::session
 
         assert(!(what & (EV_READ | EV_SIGNAL)));
         if (what & EV_WRITE) {
-            send(clsock, "hi there\n", strlen("hi there\n"), 0);
         }
         else if (what & EV_TIMEOUT) {
         }
-    }
-
-    void Session::close()
-    {
-        event_del(ev_read.get()); // here detach session. How?
-        ::shutdown(clsock, SHUT_RDWR);
     }
 
 } // namespace session

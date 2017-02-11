@@ -4,23 +4,36 @@
 #include <memory>
 #include <vector>
 #include <cstddef>
+#include <functional>
 
 #include "gopher/proto.h"
 #include "gopher/map.h"
+#include "error.h"
 
 namespace spg::session
 {
+    class SessionError : public spg::Error
+    {
+        public:
+            SessionError(const std::string &msg)
+                : spg::Error(msg)
+            {}
+            SessionError(const std::string &when, int e)
+                : spg::Error(when, e)
+            {}
+    };
+
     class Session
     {
         public:
-            Session(
-                struct event_base*,
-                unsigned session_id,
-                int clsock,
-                spg::gopher::Map& map
-            );
+            using DropCallback = std::function<void()>;
 
-            const unsigned session_id;
+            Session(
+                spg::gopher::Map& gopher_map,
+                const DropCallback& drop_callback,
+                int clsock,
+                struct event_base*
+            );
 
             Session(Session&&) = delete;
             Session(const Session&) = delete;
@@ -29,6 +42,7 @@ namespace spg::session
 
         private:
             spg::gopher::Map& gopher_map;
+            DropCallback drop_callback;
             int clsock;
 
             using Event = std::unique_ptr<
