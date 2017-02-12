@@ -1,11 +1,19 @@
 #pragma once
 
+#include <cassert>
+#include <cerrno>
 #include <cstddef>
-#include <string>
 #include <cstring>
-#include <array>
+
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
+#include <exception>
 
 #include "../error.h"
+
+#include <event2/event.h>
 
 namespace spg::gopher::proto
 {
@@ -28,61 +36,38 @@ namespace spg::gopher::proto
      */
     size_t write(int fd, const void* buffer, size_t len);
 
+    /* Unique_ptr based RAII wrapper around a 'struct event' from libevent */
+    using Event = std::unique_ptr<
+        struct event,
+        void(*)(struct event *)
+    >;
+
+    /* Set of asynchornous callbacks and parameters for line-based reading */
+    struct ReadParams {
+        struct event_base* const ev_base;
+        const timeval timeout;
+        const std::function<bool(const char*, size_t)> got_line;
+        const std::function<void(void)> got_eof;
+        const std::function<void(void)> got_timeout;
+        const std::function<void(std::exception&)> got_error;
+    };
+
     /* Stateful reader class */
-    template <
-        size_t Size,
-        typename ListenerT,
-        void (ListenerT::*GotLine)(const char *data, size_t size),
-        void (ListenerT::*GotEof)()
-    >
     class Reader
     {
         public:
-            Reader(ListenerT& lst)
-                : listener(lst)
-                , cursor(0)
-            {
-            }
-
-            void read(int fd)
-            {
-                const size_t room = buffer.size() - cursor;
-                char* start = &buffer[cursor];
-
-                size_t size = spg::gopher::proto::read(fd, start, room);
-
-                if (size == 0) {
-                    if (cursor > 0) {
-                        (listener.*GotLine)(&buffer[0], cursor);
-                    }
-                    (listener.*GotEof)();
-                    reset();
-                    return;
-                }
-
-                cursor += size;
-                char* newline = reinterpret_cast<char *>(
-                    std::memchr(start, '\n', room - size)
-                );
-
-                if (newline != nullptr) {
-                    if (newline > &buffer[0] && newline[-1] == '\r') {
-                        newline --;
-                    }
-                    *newline = '\0';
-                    (listener.*GotLine)(&buffer[0], newline - &buffer[0]);
-                    reset();
-                }
-            }
+            Reader(const ReadParams& params, size_t buflen);
+            void read_from(int sock);
 
         private:
-            inline void reset()
-            {
-                cursor = 0;
-            }
-
-            ListenerT& listener;
-            std::array<char, Size> buffer;
+            ReadParams read_params;
+            std::vector<char> buffer;
             size_t cursor;
+            spg::gopher::proto::Event ev_read;
+
+            static void cb_read(int sock, short what, void *arg);
+            void next();
+            void read_chunk(int sock);
+            void reset();
     };
 }

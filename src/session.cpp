@@ -16,66 +16,47 @@ namespace spg::session
             spg::gopher::Map& map,
             const DropCallback& drop_cb,
             int sock,
-            struct event_base *base_event) :
+            struct event_base *ev_base) :
         gopher_map(map),
         drop_callback(drop_cb),
         clsock(sock),
-        ev_read(
-            event_new(
-                base_event,
-                clsock,
-                EV_READ | EV_PERSIST | EV_TIMEOUT,
-                Session::cb_read,
-                this
+        read_params({
+            .ev_base=ev_base,
+            .timeout={5, 0},
+            .got_line=std::bind(&Session::got_line, this,
+                std::placeholders::_1,
+                std::placeholders::_2
             ),
-            event_free
-        ),
+            .got_eof=std::bind(&Session::got_eof, this),
+            .got_timeout=std::bind(&Session::got_timeout, this),
+            .got_error=std::bind(&Session::got_error, this,
+                std::placeholders::_1
+            )
+        }),
+        reader(read_params, 256u),
         ev_write(
             event_new(
-                base_event,
+                ev_base,
                 clsock,
                 EV_WRITE | EV_TIMEOUT,
                 Session::cb_write,
                 this
             ),
             event_free
-        ),
-        reader(*this)
+        )
     {
-        if (clsock < 0) {
-            throw SessionError("Invalid client socket");
-        }
-
-        const timeval timeout = {5, 1}; // here by conf.
-        if (event_add(ev_read.get(), &timeout) == -1) {
-            throw SessionError("Adding event", errno);
-        }
+        reader.read_from(sock); // FIXME: might throw IOError
     }
 
     void Session::close()
     {
-        event_del(ev_read.get());
         ::shutdown(clsock, SHUT_RDWR);
         clsock = -1;
         drop_callback();
     }
 
-    void Session::cb_read(int clsock, short what, void *arg)
+    bool Session::got_line(const char *line, size_t len)
     {
-        Session& session = *reinterpret_cast<Session*>(arg);
-        assert(!(what & (EV_WRITE | EV_SIGNAL)));
-        if (what & EV_READ) {
-            session.reader.read(clsock);
-        }
-        else if (what & EV_TIMEOUT) {
-            std::cerr << "Timed out!" << std::endl;
-            session.close();
-        }
-    }
-
-    void Session::got_line(const char *line, size_t len)
-    {
-        event_del(ev_read.get());
         std::cerr << "Got query: " << std::string(line, len) << std::endl;
         try {
             // WORK IN PROGRESS: async send of generic nodes
@@ -85,11 +66,25 @@ namespace spg::session
         catch (spg::gopher::LookupFailure& e) {
             close();
         }
+        return false; // no more read.
     }
 
     void Session::got_eof()
     {
         std::cerr << "End of file" << std::endl;
+        close();
+    }
+
+    void Session::got_timeout()
+    {
+        std::cerr << "Timed out" << std::endl;
+        close();
+    }
+
+    void Session::got_error(std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        close();
     }
 
     void Session::cb_write(int clsock, short what, void *arg)

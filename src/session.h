@@ -5,6 +5,7 @@
 #include <vector>
 #include <cstddef>
 #include <functional>
+#include <exception>
 
 #include "gopher/proto.h"
 #include "gopher/map.h"
@@ -43,29 +44,27 @@ namespace spg::session
         private:
             spg::gopher::Map& gopher_map;
             DropCallback drop_callback;
+
             int clsock;
+
+            bool got_line(const char* line, size_t len);
+            void got_eof();
+            void got_timeout();
+            void got_error(std::exception& e);
+
+            gopher::proto::ReadParams read_params;
+            gopher::proto::Reader reader;
 
             using Event = std::unique_ptr<
                 struct event,
                 void(*)(struct event *)
             >;
-            Event ev_read;
             Event ev_write;
 
-            static void cb_read(int clsock, short what, void *arg);
             static void cb_write(int clsock, short what, void *arg);
-
-            void got_line(const char *line, size_t len);
-            void got_eof();
 
             void close();
 
-            gopher::proto::Reader<
-                256ul,    // bytes
-                Session,
-                &Session::got_line,
-                &Session::got_eof
-            > reader;
     };
 
 } // namespace session
