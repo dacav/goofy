@@ -177,4 +177,43 @@ namespace spg::gopher::proto
         ev_write.reset();
     }
 
+    LinesWriter::LinesWriter(const WriteParams& params) :
+        Writer(params),
+        cursor(0)
+    {
+    }
+
+    void LinesWriter::insert(const std::string& line)
+    {
+        buffer.insert(buffer.end(), line.begin(), line.end());
+        buffer.push_back('\r');
+        buffer.push_back('\n');
+    }
+
+    void LinesWriter::write_chunk(int sock)
+    {
+        size_t sent = spg::gopher::proto::write(sock,
+            &buffer[cursor], buffer.size() - cursor
+        );
+
+        if (sent == 0) {
+            throw IOError("wrote 0 bytes");
+        }
+
+        cursor += sent;
+        if (cursor < buffer.size()) {
+            next();
+        }
+        else {
+            assert(cursor == buffer.size()); // never >
+            write_params.got_success();
+        }
+    }
+
+    void LinesWriter::reset()
+    {
+        Writer::reset();
+        cursor = 0;
+    }
+
 }

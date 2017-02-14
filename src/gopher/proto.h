@@ -20,6 +20,9 @@ namespace spg::gopher::proto
     class IOError : public Error
     {
         public:
+            IOError(const std::string &msg)
+                : Error(msg)
+            {}
             IOError(const std::string &msg, int e)
                 : Error(msg, e)
             {}
@@ -60,7 +63,7 @@ namespace spg::gopher::proto
             void read_from(int sock);
 
         private:
-            ReadParams read_params;
+            const ReadParams read_params;
             std::vector<char> buffer;
             size_t cursor;
             spg::gopher::proto::Event ev_read;
@@ -91,13 +94,27 @@ namespace spg::gopher::proto
         protected:
             virtual void write_chunk(int sock) = 0;
             virtual void reset();
+            void next();
+            const WriteParams write_params;
 
         private:
-            WriteParams write_params;
             spg::gopher::proto::Event ev_write;
 
             static void cb_write(int sock, short what, void *arg);
-            void next();
+    };
+
+    class LinesWriter : public Writer
+    {
+        public:
+            LinesWriter(const WriteParams& params);
+            void insert(const std::string& line);
+
+        private:
+            std::vector<char> buffer;
+            unsigned cursor;
+
+            virtual void write_chunk(int sock) override;
+            virtual void reset() override;
     };
 
 }
