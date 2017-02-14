@@ -120,4 +120,61 @@ namespace spg::gopher::proto
         ev_read.reset();
     }
 
+    Writer::Writer(const WriteParams& params) :
+        write_params(params),
+        ev_write(nullptr, event_free)
+    {
+    }
+
+    void Writer::write_to(int sock)
+    {
+        assert(ev_write.get() == nullptr);
+
+        ev_write.reset(event_new(
+            write_params.ev_base,
+            sock,
+            EV_WRITE | EV_TIMEOUT,
+            Writer::cb_write,
+            this
+        ));
+
+        // TODO: Just not mentioned by the reference of libevent.
+        // Try putting -1, see if this is really true.
+        assert(ev_write.get() != nullptr);
+        next();
+    }
+
+    void Writer::cb_write(int sock, short what, void *arg)
+    {
+        Writer& writer = *reinterpret_cast<Writer*>(arg);
+
+        assert(!(what & (EV_READ | EV_SIGNAL)));
+        if (what & EV_WRITE) {
+            try {
+                writer.write_chunk(sock);
+            }
+            catch (std::exception& e) {
+                writer.write_params.got_error(e);
+                writer.reset();
+            }
+        }
+        else if (what & EV_TIMEOUT) {
+            writer.write_params.got_timeout();
+            writer.reset();
+        }
+    }
+
+    void Writer::next()
+    {
+        if (event_add(ev_write.get(), &write_params.timeout) == -1) {
+            // TODO: beware of throws
+            throw IOError("event_add (EV_READ|EV_TIMEOUT)", errno);
+        }
+    }
+
+    void Writer::reset()
+    {
+        ev_write.reset();
+    }
+
 }

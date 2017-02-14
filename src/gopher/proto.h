@@ -70,4 +70,34 @@ namespace spg::gopher::proto
             void read_chunk(int sock);
             void reset();
     };
+
+    /* Set of asynchornous callbacks and parameters for line-based reading */
+    struct WriteParams {
+        struct event_base* const ev_base;
+        const timeval timeout;
+        const std::function<void(void)> got_success;
+        const std::function<void(std::exception)> got_error;
+        const std::function<void(void)> got_timeout;
+    };
+
+    /* Stateful writer class */
+    class Writer
+    {
+        public:
+            Writer(const WriteParams& params);
+
+            void write_to(int sock);
+
+        protected:
+            virtual void write_chunk(int sock) = 0;
+            virtual void reset();
+
+        private:
+            WriteParams write_params;
+            spg::gopher::proto::Event ev_write;
+
+            static void cb_write(int sock, short what, void *arg);
+            void next();
+    };
+
 }
