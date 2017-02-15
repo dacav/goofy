@@ -132,6 +132,7 @@ namespace spg::gopher::proto
 
     void Writer::write_to(int sock)
     {
+        before_write();
         assert(ev_write.get() == nullptr);
 
         ev_write.reset(event_new(
@@ -146,6 +147,10 @@ namespace spg::gopher::proto
         // Try putting -1, see if this is really true.
         assert(ev_write.get() != nullptr);
         next();
+    }
+
+    void Writer::before_write()
+    {
     }
 
     void Writer::cb_write(int sock, short what, void *arg)
@@ -192,6 +197,14 @@ namespace spg::gopher::proto
         buffer.insert(buffer.end(), line.begin(), line.end());
         buffer.push_back('\r');
         buffer.push_back('\n');
+    }
+
+    void LinesWriter::before_write()
+    {
+        Writer::before_write();
+
+        const char* line = ".\r\n";
+        buffer.insert(buffer.end(), line, line + 3);
     }
 
     void LinesWriter::write_chunk(int sock)

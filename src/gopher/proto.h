@@ -94,6 +94,7 @@ namespace spg::gopher::proto
 
         protected:
             virtual void write_chunk(int sock) = 0;
+            virtual void before_write();
             void next();
             const WriteParams write_params;
 
@@ -109,6 +110,7 @@ namespace spg::gopher::proto
         public:
             LinesWriter(const WriteParams& params);
             void insert(const std::string& line);
+            virtual void before_write() override;
 
         private:
             std::vector<char> buffer;
