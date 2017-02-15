@@ -18,7 +18,7 @@
 #include <event2/event.h>
 #include <event2/listener.h>
 
-#include <unistd.h> // tmp, use for write
+#include <signal.h>
 #include <ext/stdio_filebuf.h>
 
 namespace
@@ -93,6 +93,15 @@ namespace
         event_base_loopexit(base, NULL);
     }
 
+    void cb_signal(int sig, short what, void *ctx)
+    {
+        GlobalContext& globals = *reinterpret_cast<GlobalContext*>(ctx);
+
+        assert(what & EV_SIGNAL);
+        std::cerr << "Got signal " << sig << std::endl;
+        event_base_loopbreak(globals.base_event.get());
+    }
+
 } // anon namespace
 
 int main(int argc, char **argv)
@@ -132,6 +141,12 @@ int main(int argc, char **argv)
         evconnlistener_free
     );
     evconnlistener_set_error_cb(listener.get(), cb_accept_err);
+
+    std::unique_ptr<struct event, void(*)(struct event*)> sighandler(
+        evsignal_new(globals.base_event.get(), SIGINT, cb_signal, &globals),
+        event_free
+    );
+    event_add(sighandler.get(), NULL);
 
     if (listener.get() == nullptr) {
         std::cerr << "Cannot listen: " << strerror(errno) << std::endl;
