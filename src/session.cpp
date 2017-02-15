@@ -47,7 +47,6 @@ namespace spg::session
 
     bool Session::got_line(const char *line, size_t len)
     {
-        std::cerr << "Got query: " << std::string(line, len) << std::endl;
         try {
             spg::gopher::proto::WriteParams params = {
                 .ev_base = read_params.ev_base,
