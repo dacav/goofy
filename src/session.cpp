@@ -47,23 +47,25 @@ namespace spg::session
 
     bool Session::got_line(const char *line, size_t len)
     {
+        gopher::proto::WriteParams params = {
+            .ev_base = read_params.ev_base,
+            .timeout = read_params.timeout,
+            .got_success = std::bind(&Session::close, this),
+            .got_error = read_params.got_error,
+            .got_timeout = read_params.got_timeout
+        };
+        std::cerr << "Got query: " << std::string(line, len) << std::endl;
+
         try {
-            spg::gopher::proto::WriteParams params = {
-                .ev_base = read_params.ev_base,
-                .timeout = read_params.timeout,
-                .got_success = std::bind(&Session::close, this),
-                .got_error = read_params.got_error,
-                .got_timeout = read_params.got_timeout
-            };
             writer = std::move(
                 gopher_map.lookup(std::string(line, len)).writer(params)
             );
-            writer->write_to(clsock);
         }
-        catch (spg::gopher::LookupFailure& e) {
-            close();
+        catch (spg::UserError& e) {
+            //writer.reset(new gopher::proto::ErrorWriter(params, e));
+            writer.reset(nullptr);
         }
-        // XXX more catch?
+        writer->write_to(clsock);
         return false; // no more read.
     }
 

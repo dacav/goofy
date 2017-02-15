@@ -17,4 +17,14 @@ namespace spg
                 : std::runtime_error(when + ": " + std::strerror(e))
             {}
     };
+
+    class UserError : public Error
+    {
+        public:
+            UserError(const char* name, const std::string &msg) :
+                Error(msg),
+                error_name(name)
+            {}
+            const char* error_name;
+    };
 }
