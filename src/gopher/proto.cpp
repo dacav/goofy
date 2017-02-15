@@ -120,9 +120,14 @@ namespace spg::gopher::proto
         ev_read.reset();
     }
 
-    Writer::Writer(const WriteParams& params) :
+    Writer::Writer(const WriteParams& params, bool d) :
         write_params(params),
-        ev_write(nullptr, event_free)
+        ev_write(nullptr, event_free),
+        detached(d)
+    {
+    }
+
+    Writer::~Writer()
     {
     }
 
@@ -155,12 +160,12 @@ namespace spg::gopher::proto
             }
             catch (std::exception& e) {
                 writer.write_params.got_error(e);
-                writer.reset();
+                writer.end();
             }
         }
         else if (what & EV_TIMEOUT) {
             writer.write_params.got_timeout();
-            writer.reset();
+            writer.end();
         }
     }
 
@@ -172,9 +177,12 @@ namespace spg::gopher::proto
         }
     }
 
-    void Writer::reset()
+    void Writer::end()
     {
         ev_write.reset();
+        if (detached) {
+            delete this;
+        }
     }
 
     LinesWriter::LinesWriter(const WriteParams& params) :
@@ -208,12 +216,6 @@ namespace spg::gopher::proto
             assert(cursor == buffer.size()); // never >
             write_params.got_success();
         }
-    }
-
-    void LinesWriter::reset()
-    {
-        Writer::reset();
-        cursor = 0;
     }
 
 }

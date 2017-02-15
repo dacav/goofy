@@ -87,18 +87,21 @@ namespace spg::gopher::proto
     class Writer
     {
         public:
-            Writer(const WriteParams& params);
+            Writer(const WriteParams& params,
+                   bool detached=false);
+            virtual ~Writer();
 
             void write_to(int sock);
 
         protected:
             virtual void write_chunk(int sock) = 0;
-            virtual void reset();
             void next();
             const WriteParams write_params;
 
         private:
             spg::gopher::proto::Event ev_write;
+            const bool detached;
+            virtual void end();
 
             static void cb_write(int sock, short what, void *arg);
     };
@@ -114,7 +117,6 @@ namespace spg::gopher::proto
             unsigned cursor;
 
             virtual void write_chunk(int sock) override;
-            virtual void reset() override;
     };
 
 }
