@@ -33,17 +33,7 @@ namespace spg::session
                 std::placeholders::_1
             )
         }),
-        reader(read_params, 256u),
-        ev_write(
-            event_new(
-                ev_base,
-                clsock,
-                EV_WRITE | EV_TIMEOUT,
-                Session::cb_write,
-                this
-            ),
-            event_free
-        )
+        reader(read_params, 256u)
     {
         reader.read_from(sock); // FIXME: might throw IOError
     }
@@ -59,13 +49,22 @@ namespace spg::session
     {
         std::cerr << "Got query: " << std::string(line, len) << std::endl;
         try {
-            // WORK IN PROGRESS: async send of generic nodes
-            //gopher_map.lookup(std::string(line, len)).show(clsock);
-            //spg::gopher::proto::writedone(clsock);
+            spg::gopher::proto::WriteParams params = {
+                .ev_base = read_params.ev_base,
+                .timeout = read_params.timeout,
+                .got_success = std::bind(&Session::close, this),
+                .got_error = read_params.got_error,
+                .got_timeout = read_params.got_timeout
+            };
+            writer = std::move(
+                gopher_map.lookup(std::string(line, len)).writer(params)
+            );
+            writer->write_to(clsock);
         }
         catch (spg::gopher::LookupFailure& e) {
             close();
         }
+        // XXX more catch?
         return false; // no more read.
     }
 
@@ -85,18 +84,6 @@ namespace spg::session
     {
         std::cerr << e.what() << std::endl;
         close();
-    }
-
-    void Session::cb_write(int clsock, short what, void *arg)
-    {
-        //Session& context = *reinterpret_cast<Session*>(arg);
-        std::cerr << "Writing to you..." << std::endl;
-
-        assert(!(what & (EV_READ | EV_SIGNAL)));
-        if (what & EV_WRITE) {
-        }
-        else if (what & EV_TIMEOUT) {
-        }
     }
 
 } // namespace session

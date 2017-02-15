@@ -21,7 +21,9 @@ namespace spg::gopher
 
             void insert(const Node& item);
 
-            virtual void show(int fd) override;
+            using WriteParams = gopher::proto::WriteParams;
+            using Writer = gopher::proto::Writer;
+            virtual std::unique_ptr<Writer> writer(const WriteParams& wp) override;
 
         private:
             const Map& map;

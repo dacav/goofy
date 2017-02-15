@@ -42,7 +42,7 @@ namespace spg::session
             void operator=(Session&&) = delete;
 
         private:
-            spg::gopher::Map& gopher_map;
+            gopher::Map& gopher_map;
             DropCallback drop_callback;
 
             int clsock;
@@ -54,14 +54,7 @@ namespace spg::session
 
             gopher::proto::ReadParams read_params;
             gopher::proto::Reader reader;
-
-            using Event = std::unique_ptr<
-                struct event,
-                void(*)(struct event *)
-            >;
-            Event ev_write;
-
-            static void cb_write(int clsock, short what, void *arg);
+            std::unique_ptr<gopher::proto::Writer> writer;
 
             void close();
 

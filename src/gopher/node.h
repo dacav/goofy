@@ -2,7 +2,9 @@
 
 #include <cstddef>
 #include <string>
+#include <memory>
 
+#include "proto.h"
 #include "../error.h"
 
 namespace spg::gopher
@@ -34,7 +36,9 @@ namespace spg::gopher
 
             const std::string repr;
 
-            virtual void show(int fd) = 0;
+            using WriteParams = spg::gopher::proto::WriteParams;
+            using Writer = spg::gopher::proto::Writer;
+            virtual std::unique_ptr<Writer> writer(const WriteParams& wp) = 0;
     };
 
 }

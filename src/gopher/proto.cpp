@@ -16,7 +16,7 @@ namespace spg::gopher::proto
 
     size_t write(int fd, const void* buffer, size_t len)
     {
-        ssize_t n = write(fd, buffer, len);
+        ssize_t n = ::write(fd, buffer, len);
         if (n < 0) {
             throw IOError("write", errno);
         }
@@ -185,8 +185,8 @@ namespace spg::gopher::proto
         }
     }
 
-    LinesWriter::LinesWriter(const WriteParams& params) :
-        Writer(params),
+    LinesWriter::LinesWriter(const WriteParams& params, bool detached) :
+        Writer(params, detached),
         cursor(0)
     {
     }

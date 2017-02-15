@@ -26,23 +26,26 @@ namespace spg::gopher
         subs.push_back(item.selector);
     }
 
-    void NodeDirList::show(int fd)
+    std::unique_ptr<gopher::proto::Writer> NodeDirList::writer(const WriteParams& wp)
     {
-        //using spg::gopher::proto::writeln;
+        using spg::gopher::proto::LinesWriter;
 
+        auto writer = new LinesWriter(wp, true);
+        std::unique_ptr<Writer> out(writer);
         auto end = subs.cend();
         auto i = subs.begin();
 
         while (i != end) {
             try {
-                // TODO: how do we send async?
-                //writeln(fd, map.lookup(*i).repr);
+                writer->insert(map.lookup(*i).repr);
                 i ++;
             }
             catch (LookupFailure &e) {
                 i = subs.erase(i);
             }
         }
+
+        return out;
     }
 
 }

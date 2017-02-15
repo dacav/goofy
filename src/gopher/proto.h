@@ -79,7 +79,7 @@ namespace spg::gopher::proto
         struct event_base* const ev_base;
         const timeval timeout;
         const std::function<void(void)> got_success;
-        const std::function<void(std::exception)> got_error;
+        const std::function<void(std::exception&)> got_error;
         const std::function<void(void)> got_timeout;
     };
 
@@ -109,7 +109,7 @@ namespace spg::gopher::proto
     class LinesWriter : public Writer
     {
         public:
-            LinesWriter(const WriteParams& params);
+            LinesWriter(const WriteParams& params, bool detached=false);
             void insert(const std::string& line);
 
         private:
