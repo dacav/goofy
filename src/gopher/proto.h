@@ -87,8 +87,7 @@ namespace spg::gopher::proto
     class Writer
     {
         public:
-            Writer(const WriteParams& params,
-                   bool detached=false);
+            Writer(const WriteParams& params);
             virtual ~Writer();
 
             void write_to(int sock);
@@ -100,7 +99,6 @@ namespace spg::gopher::proto
 
         private:
             spg::gopher::proto::Event ev_write;
-            const bool detached;
             virtual void end();
 
             static void cb_write(int sock, short what, void *arg);
@@ -109,7 +107,7 @@ namespace spg::gopher::proto
     class LinesWriter : public Writer
     {
         public:
-            LinesWriter(const WriteParams& params, bool detached=false);
+            LinesWriter(const WriteParams& params);
             void insert(const std::string& line);
 
         private:

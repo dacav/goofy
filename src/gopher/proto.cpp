@@ -120,10 +120,9 @@ namespace spg::gopher::proto
         ev_read.reset();
     }
 
-    Writer::Writer(const WriteParams& params, bool d) :
+    Writer::Writer(const WriteParams& params) :
         write_params(params),
-        ev_write(nullptr, event_free),
-        detached(d)
+        ev_write(nullptr, event_free)
     {
     }
 
@@ -180,13 +179,10 @@ namespace spg::gopher::proto
     void Writer::end()
     {
         ev_write.reset();
-        if (detached) {
-            delete this;
-        }
     }
 
-    LinesWriter::LinesWriter(const WriteParams& params, bool detached) :
-        Writer(params, detached),
+    LinesWriter::LinesWriter(const WriteParams& params) :
+        Writer(params),
         cursor(0)
     {
     }

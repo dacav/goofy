@@ -30,7 +30,7 @@ namespace spg::gopher
     {
         using spg::gopher::proto::LinesWriter;
 
-        auto writer = new LinesWriter(wp, true);
+        auto writer = new LinesWriter(wp);
         std::unique_ptr<Writer> out(writer);
         auto end = subs.cend();
         auto i = subs.begin();
