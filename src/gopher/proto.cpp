@@ -26,7 +26,7 @@ namespace spg::gopher::proto
     Reader::Reader(const ReadParams& rp,
                    size_t buflen) :
         read_params(rp),
-        buffer(buflen),
+        buffer(buflen + 2), // accounting for "\r\n"
         cursor(0),
         ev_read(nullptr, event_free)
     {
@@ -34,7 +34,9 @@ namespace spg::gopher::proto
 
     void Reader::read_from(int sock)
     {
-        assert(ev_read.get() == nullptr);
+        if (ev_read.get() != nullptr) {
+            throw IOError("Reader::read_from of a busy reader");
+        }
 
         ev_read.reset(event_new(
             read_params.ev_base,

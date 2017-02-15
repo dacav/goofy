@@ -22,12 +22,12 @@ namespace spg::session
         clsock(sock),
         read_params({
             .ev_base=ev_base,
-            .timeout={5, 0},
             .got_line=std::bind(&Session::got_line, this,
                 std::placeholders::_1,
                 std::placeholders::_2
             ),
             .got_eof=std::bind(&Session::got_eof, this),
+            .timeout={5, 0},
             .got_timeout=std::bind(&Session::got_timeout, this),
             .got_error=std::bind(&Session::got_error, this,
                 std::placeholders::_1
