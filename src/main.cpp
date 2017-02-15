@@ -45,7 +45,7 @@ namespace
 
         void drop_session(unsigned session_id)
         {
-            std::cerr << "kaboom " << session_id;
+            sessions.erase(session_id);
         }
 
         spg::session::Session& new_session(int clsock)
