@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 {
     // Stuff to put in configuration
     const char* ip = "::1";
-    const uint16_t port = 8070;
+    const uint16_t port = 7070;
     const unsigned backlog = 10;
     const bool sock_reusable = true;
 
@@ -119,9 +119,9 @@ int main(int argc, char **argv)
     GlobalContext globals;
     {
         using namespace spg::gopher;
-        auto& root = globals.gopher_map.mknode<NodeDirList>("root", "", ip, port);
-        auto& l1 = globals.gopher_map.mknode<NodeDirList>("le boobs", "le/boobs", ip, port);
-        auto& l2 = globals.gopher_map.mknode<NodeDirList>("le boobies", "le/boobies", ip, port);
+        auto& root = globals.gopher_map.mknode<NodeDirList>("root", "", "localhost", port);
+        auto& l1 = globals.gopher_map.mknode<NodeDirList>("le boobs", "le/boobs", "localhost", port);
+        auto& l2 = globals.gopher_map.mknode<NodeDirList>("le boobies", "le/boobies", "localhost", port);
         root.insert(l1);
         l1.insert(l2);
         l2.insert(l1);
