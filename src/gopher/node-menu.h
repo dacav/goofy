@@ -10,14 +10,14 @@
 
 namespace spg::gopher
 {
-    class NodeDirList : public Node
+    class NodeMenu : public Node
     {
         public:
-            NodeDirList(const Map& map,
-                        const std::string& display_name,
-                        const std::string& selector,
-                        const std::string& host,
-                        uint16_t port);
+            NodeMenu(const Map& map,
+                     const std::string& display_name,
+                     const std::string& selector,
+                     const std::string& host,
+                     uint16_t port);
 
             void insert(const Node& item);
 

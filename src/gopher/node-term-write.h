@@ -3,7 +3,7 @@
 #include <ostream>
 
 #include "node.h"
-#include "node-dirlist.h"
+#include "node-menu.h"
 
 template <typename CharT, typename Traits>
 std::basic_ostream<CharT, Traits>& operator<<(

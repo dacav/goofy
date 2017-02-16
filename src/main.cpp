@@ -1,6 +1,6 @@
 #include "error.h"
 
-#include "gopher/node-dirlist.h"
+#include "gopher/node-menu.h"
 #include "gopher/node-term-write.h"
 #include "gopher/map.h"
 
@@ -119,9 +119,9 @@ int main(int argc, char **argv)
     GlobalContext globals;
     {
         using namespace spg::gopher;
-        auto& root = globals.gopher_map.mknode<NodeDirList>("root", "", "localhost", port);
-        auto& l1 = globals.gopher_map.mknode<NodeDirList>("le boobs", "le/boobs", "localhost", port);
-        auto& l2 = globals.gopher_map.mknode<NodeDirList>("le boobies", "le/boobies", "localhost", port);
+        auto& root = globals.gopher_map.mknode<NodeMenu>("root", "", "localhost", port);
+        auto& l1 = globals.gopher_map.mknode<NodeMenu>("le boobs", "le/boobs", "localhost", port);
+        auto& l2 = globals.gopher_map.mknode<NodeMenu>("le boobies", "le/boobies", "localhost", port);
         root.insert(l1);
         l1.insert(l2);
         l2.insert(l1);
