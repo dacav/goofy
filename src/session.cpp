@@ -62,8 +62,9 @@ namespace spg::session
             );
         }
         catch (spg::UserError& e) {
-            //writer.reset(new gopher::proto::ErrorWriter(params, e));
-            writer.reset(nullptr);
+            // All the UserError kind of errors are handled by notifying the
+            // user. This includes lookup failures.
+            writer.reset(new gopher::proto::ErrorWriter(params, e));
         }
         writer->write_to(clsock);
         return false; // no more read.

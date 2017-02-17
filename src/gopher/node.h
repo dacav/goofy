@@ -5,14 +5,11 @@
 #include <memory>
 
 #include "proto.h"
+#include "node-types.h"
 #include "../error.h"
 
 namespace spg::gopher
 {
-    enum NodeType {
-        NT_PLAIN = '0',
-        NT_DIRLIST = '1',
-    };
 
     class NodeError : public spg::Error {
         public:

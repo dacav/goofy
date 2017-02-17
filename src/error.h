@@ -23,8 +23,10 @@ namespace spg
         public:
             UserError(const char* name, const std::string &msg) :
                 Error(msg),
-                error_name(name)
+                error_name(name),
+                error_name_len(std::strlen(name))
             {}
             const char* error_name;
+            const size_t error_name_len;
     };
 }

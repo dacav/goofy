@@ -1,4 +1,5 @@
 #include "proto.h"
+#include "node-types.h"
 
 #include <unistd.h>
 #include <cerrno>
@@ -134,9 +135,9 @@ namespace spg::gopher::proto
 
     void Writer::write_to(int sock)
     {
-        before_write();
         assert(ev_write.get() == nullptr);
 
+        before_write();
         ev_write.reset(event_new(
             write_params.ev_base,
             sock,
@@ -207,6 +208,7 @@ namespace spg::gopher::proto
 
         const char* line = ".\r\n";
         buffer.insert(buffer.end(), line, line + 3);
+        buffer.shrink_to_fit();
     }
 
     void LinesWriter::write_chunk(int sock)
@@ -227,6 +229,23 @@ namespace spg::gopher::proto
             assert(cursor == buffer.size()); // never >
             write_params.got_success();
         }
+    }
+
+    ErrorWriter::ErrorWriter(const WriteParams& params,
+                             const UserError& e) :
+        LinesWriter(params)
+    {
+        const char* what = e.what();
+        const char eol[] = "\t\terror.host\t1\r\n";
+
+        buffer.push_back(char(NodeType::NT_ERROR));
+        buffer.insert(buffer.end(),
+            e.error_name, e.error_name + e.error_name_len
+        );
+        buffer.insert(buffer.end(), eol, eol + sizeof(eol));
+        buffer.push_back(char(NodeType::NT_INFO));
+        buffer.insert(buffer.end(), what, what + std::strlen(what));
+        buffer.insert(buffer.end(), eol, eol + sizeof(eol));
     }
 
 }

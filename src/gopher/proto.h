@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <exception>
+#include <initializer_list>
 
 #include "../error.h"
 
@@ -152,11 +153,18 @@ namespace spg::gopher::proto
             void insert(const std::string& line);
             virtual void before_write() override;
 
-        private:
+        protected:
             std::vector<char> buffer;
+        private:
             unsigned cursor;
 
             virtual void write_chunk(int sock) override;
+    };
+
+    class ErrorWriter : public LinesWriter
+    {
+        public:
+            ErrorWriter(const WriteParams& params, const UserError& e);
     };
 
 }
