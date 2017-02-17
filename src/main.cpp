@@ -150,22 +150,22 @@ int main(int argc, char **argv)
 
     if (listener.get() == nullptr) {
         std::cerr << "Cannot listen: " << strerror(errno) << std::endl;
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     // todo: stderr of libevent
     switch (event_base_dispatch(globals.base_event.get())) {
         case -1: // error
             std::cerr << "error from libevent" << std::endl;
-            exit(EXIT_FAILURE);
+            return 1;
             break;
         case 0: // exited normally
             std::cerr << "terminated normally" << std::endl;
-            exit(EXIT_SUCCESS);
+            return 0;
             break;
         case 1: // no more events
             std::cerr << "no more events" << std::endl;
-            exit(EXIT_SUCCESS);
+            return 0;
             break;
     }
 }
