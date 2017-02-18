@@ -1,6 +1,6 @@
 .PHONY : all clean
 
-CXXFLAGS := -Wall -std=c++11 $(shell pkg-config --cflags libevent)
+CXXFLAGS := -Wall -std=c++14 $(shell pkg-config --cflags libevent)
 LDFLAGS := $(shell pkg-config --libs libevent)
 
 DIRS := $(shell find . -type d)
