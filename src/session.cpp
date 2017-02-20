@@ -58,10 +58,8 @@ namespace spg::session
         };
 
         try {
-            writer = std::move(
-                gopher_map.lookup(request.selector)
-                          .make_writer(params, request)
-            );
+            writer = gopher_map.lookup(request.selector)
+                                .make_writer(params, request);
         }
         catch (spg::UserError& e) {
             // All the UserError kind of errors are handled by notifying the
