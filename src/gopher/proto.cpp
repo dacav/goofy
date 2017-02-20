@@ -1,8 +1,8 @@
 #include "proto.h"
 #include "node-types.h"
 
-#include <unistd.h>
 #include <cerrno>
+#include <unistd.h>
 
 namespace spg::gopher::proto
 {
@@ -189,20 +189,27 @@ namespace spg::gopher::proto
         ev_write.reset();
     }
 
-    LinesWriter::LinesWriter(const WriteParams& params) :
+    MenuWriter::MenuWriter(const WriteParams& params) :
         Writer(params),
         cursor(0)
     {
     }
 
-    void LinesWriter::insert(const std::string& line)
+    void MenuWriter::insert(const NodeInfo& info)
     {
-        buffer.insert(buffer.end(), line.begin(), line.end());
-        buffer.push_back('\r');
-        buffer.push_back('\n');
+        append(info.type);
+        append(info.display_name);
+        append('\t');
+        append(info.selector);
+        append('\t');
+        append(info.host);
+        append('\t');
+        append(std::to_string(info.port));
+        append('\r');
+        append('\n');
     }
 
-    void LinesWriter::before_write()
+    void MenuWriter::before_write()
     {
         Writer::before_write();
 
@@ -211,7 +218,22 @@ namespace spg::gopher::proto
         buffer.shrink_to_fit();
     }
 
-    void LinesWriter::write_chunk(int sock)
+    void MenuWriter::append(const char* bytes, size_t len)
+    {
+        buffer.insert(buffer.end(), bytes, bytes + len);
+    }
+
+    void MenuWriter::append(const std::string& string)
+    {
+        buffer.insert(buffer.end(), string.begin(), string.end());
+    }
+
+    void MenuWriter::append(const char& byte)
+    {
+        buffer.push_back(byte);
+    }
+
+    void MenuWriter::write_chunk(int sock)
     {
         size_t sent = spg::gopher::proto::write(sock,
             &buffer[cursor], buffer.size() - cursor
@@ -233,19 +255,17 @@ namespace spg::gopher::proto
 
     ErrorWriter::ErrorWriter(const WriteParams& params,
                              const UserError& e) :
-        LinesWriter(params)
+        MenuWriter(params)
     {
         const char* what = e.what();
         const char eol[] = "\t\terror.host\t1\r\n";
 
-        buffer.push_back(char(NodeType::NT_ERROR));
-        buffer.insert(buffer.end(),
-            e.error_name, e.error_name + e.error_name_len
-        );
-        buffer.insert(buffer.end(), eol, eol + sizeof(eol));
-        buffer.push_back(char(NodeType::NT_INFO));
-        buffer.insert(buffer.end(), what, what + std::strlen(what));
-        buffer.insert(buffer.end(), eol, eol + sizeof(eol));
+        append(NodeType::NT_ERROR);
+        append(e.error_name, e.error_name_len);
+        append(eol, sizeof(eol));
+        append(NodeType::NT_INFO);
+        append(what, std::strlen(what));
+        append(eol, sizeof(eol));
     }
 
 }

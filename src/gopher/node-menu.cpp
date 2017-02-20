@@ -30,16 +30,16 @@ namespace spg::gopher
             const WriteParams& wp,
             const request::Request& request)
     {
-        using spg::gopher::proto::LinesWriter;
+        using spg::gopher::proto::MenuWriter;
 
-        auto writer = new LinesWriter(wp);
+        auto writer = new MenuWriter(wp);
         std::unique_ptr<Writer> out(writer);
         auto end = subs.cend();
         auto i = subs.begin();
 
         while (i != end) {
             try {
-                writer->insert(map.lookup(*i).repr);
+                writer->insert(map.lookup(*i).info);
                 i ++;
             }
             catch (LookupFailure &e) {

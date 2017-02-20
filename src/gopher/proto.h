@@ -13,6 +13,7 @@
 #include <initializer_list>
 
 #include "../error.h"
+#include "node-types.h"
 
 #include <event2/event.h>
 
@@ -146,22 +147,26 @@ namespace spg::gopher::proto
             static void cb_write(int sock, short what, void *arg);
     };
 
-    class LinesWriter : public Writer
+    class MenuWriter : public Writer
     {
         public:
-            LinesWriter(const WriteParams& params);
-            void insert(const std::string& line);
+            MenuWriter(const WriteParams& params);
+            void insert(const NodeInfo& info);
             virtual void before_write() override;
 
         protected:
-            std::vector<char> buffer;
+            inline void append(const char* bytes, size_t len);
+            inline void append(const std::string& string);
+            inline void append(const char& byte);
+
         private:
+            std::vector<char> buffer;
             unsigned cursor;
 
             virtual void write_chunk(int sock) override;
     };
 
-    class ErrorWriter : public LinesWriter
+    class ErrorWriter : public MenuWriter
     {
         public:
             ErrorWriter(const WriteParams& params, const UserError& e);

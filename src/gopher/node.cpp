@@ -15,8 +15,7 @@ namespace spg::gopher
             selector,
             host,
             port
-        ),
-        repr(info.mkrepr())
+        )
     {
         for (auto &s : {display_name, selector, host}) {
             if (s.find('\t') != std::string::npos) {

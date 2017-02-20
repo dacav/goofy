@@ -26,7 +26,6 @@ namespace spg::gopher
             virtual ~Node();
 
             const NodeInfo info;
-            const std::string repr;
 
             using WriteParams = spg::gopher::proto::WriteParams;
             using Writer = spg::gopher::proto::Writer;
