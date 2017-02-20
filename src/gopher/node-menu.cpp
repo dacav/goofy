@@ -23,7 +23,7 @@ namespace spg::gopher
 
     void NodeMenu::insert(const Node& item)
     {
-        subs.push_back(item.selector);
+        subs.push_back(item.info.selector);
     }
 
     std::unique_ptr<gopher::proto::Writer> NodeMenu::make_writer(

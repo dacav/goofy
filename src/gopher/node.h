@@ -1,8 +1,6 @@
 #pragma once
 
-#include <cstddef>
 #include <string>
-#include <memory>
 
 #include "proto.h"
 #include "node-types.h"
@@ -27,12 +25,7 @@ namespace spg::gopher
                  uint16_t port);
             virtual ~Node();
 
-            const char type;
-            const std::string display_name;
-            const std::string selector;
-            const std::string host;
-            const uint16_t port;
-
+            const NodeInfo info;
             const std::string repr;
 
             using WriteParams = spg::gopher::proto::WriteParams;

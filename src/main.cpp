@@ -1,7 +1,6 @@
 #include "error.h"
 
 #include "gopher/node-menu.h"
-#include "gopher/node-term-write.h"
 #include "gopher/map.h"
 
 #include "parse/ip.h"

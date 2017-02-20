@@ -1,7 +1,5 @@
 #include "map.h"
 
-#include "node-term-write.h"
-
 #include <algorithm>
 #include <utility>
 #include <sstream>
@@ -20,7 +18,7 @@ namespace spg::gopher
 
     std::unique_ptr<Node>& Map::insert(Node *item)
     {
-        const std::string &selector = item->selector;
+        const std::string &selector = item->info.selector;
         decltype(nodes)::iterator ins;
         bool success;
 
