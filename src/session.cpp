@@ -86,7 +86,7 @@ namespace spg::session
 
     void Session::got_error(std::exception& e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
         close();
     }
 
