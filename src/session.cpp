@@ -47,6 +47,8 @@ namespace spg::session
 
     bool Session::got_line(const char *line, size_t len)
     {
+        gopher::request::Request request(line, len);
+
         gopher::proto::WriteParams params = {
             .ev_base = read_params.ev_base,
             .timeout = read_params.timeout,
@@ -54,11 +56,11 @@ namespace spg::session
             .got_error = read_params.got_error,
             .got_timeout = read_params.got_timeout
         };
-        std::cerr << "Got query: " << std::string(line, len) << std::endl;
 
         try {
             writer = std::move(
-                gopher_map.lookup(std::string(line, len)).writer(params)
+                gopher_map.lookup(request.selector)
+                          .make_writer(params, request)
             );
         }
         catch (spg::UserError& e) {

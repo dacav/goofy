@@ -23,7 +23,10 @@ namespace spg::gopher
 
             using WriteParams = gopher::proto::WriteParams;
             using Writer = gopher::proto::Writer;
-            virtual std::unique_ptr<Writer> writer(const WriteParams& wp) override;
+            virtual std::unique_ptr<Writer> make_writer(
+                const WriteParams& wp,
+                const request::Request& req
+            ) override;
 
         private:
             const Map& map;

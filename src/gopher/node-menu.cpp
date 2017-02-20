@@ -26,7 +26,9 @@ namespace spg::gopher
         subs.push_back(item.selector);
     }
 
-    std::unique_ptr<gopher::proto::Writer> NodeMenu::writer(const WriteParams& wp)
+    std::unique_ptr<gopher::proto::Writer> NodeMenu::make_writer(
+            const WriteParams& wp,
+            const request::Request& request)
     {
         using spg::gopher::proto::LinesWriter;
 

@@ -6,6 +6,8 @@
 
 #include "proto.h"
 #include "node-types.h"
+#include "request.h"
+
 #include "../error.h"
 
 namespace spg::gopher
@@ -35,7 +37,10 @@ namespace spg::gopher
 
             using WriteParams = spg::gopher::proto::WriteParams;
             using Writer = spg::gopher::proto::Writer;
-            virtual std::unique_ptr<Writer> writer(const WriteParams& wp) = 0;
+            virtual std::unique_ptr<Writer> make_writer(
+                const WriteParams& wp,
+                const request::Request& request
+            ) = 0;
     };
 
 }
