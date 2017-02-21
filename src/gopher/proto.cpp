@@ -2,7 +2,10 @@
 #include "node-types.h"
 
 #include <cerrno>
+
 #include <unistd.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 namespace spg::gopher::proto
 {
@@ -20,6 +23,15 @@ namespace spg::gopher::proto
         ssize_t n = ::write(fd, buffer, len);
         if (n < 0) {
             throw IOError("write", errno);
+        }
+        return size_t(n);
+    }
+
+    size_t write_nonblock(int fd, const void* buffer, size_t len)
+    {
+        ssize_t n = ::send(fd, buffer, len, MSG_DONTWAIT);
+        if (n < 0) {
+            throw IOError("send", errno);
         }
         return size_t(n);
     }
@@ -176,6 +188,7 @@ namespace spg::gopher::proto
         }
     }
 
+    // TODO: rename as 'next_event' or 'wait_ready' or so...
     void Writer::next()
     {
         if (event_add(ev_write.get(), &write_params.timeout) == -1) {

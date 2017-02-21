@@ -19,17 +19,6 @@
 
 namespace spg::gopher::proto
 {
-    class IOError : public Error
-    {
-        public:
-            IOError(const std::string &msg)
-                : Error(msg)
-            {}
-            IOError(const std::string &msg, int e)
-                : Error(msg, e)
-            {}
-    };
-
     /* Minimal wrapper for unix's read: reads at most len bytes into buffer,
      * returns the actual amount of bytes read, throws IOError in case of error.
      */
@@ -40,6 +29,15 @@ namespace spg::gopher::proto
      * case of error.
      */
     size_t write(int fd, const void* buffer, size_t len);
+
+    /* The same as spg::gopher::proto::write, but uses a MSG_DONTWAIT flag
+     * in order to have a non-blocking send.
+     *
+     * The EWOULDBLOCK condition triggers an IOError exception as any other
+     * error condition. It can be distinguished from other errors by means
+     * of the 'errno_was' field of the IOError class.
+     */
+    size_t write_nonblock(int fd, const void* buffer, size_t len);
 
     /* Unique_ptr based RAII wrapper around a 'struct event' from libevent */
     using Event = std::unique_ptr<

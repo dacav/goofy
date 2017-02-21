@@ -10,11 +10,25 @@ namespace spg
     class Error : public std::runtime_error
     {
         public:
-            Error(const std::string &msg)
-                : std::runtime_error(msg)
+            Error(const std::string &msg) :
+                std::runtime_error(msg),
+                errno_was(0)
             {}
-            Error(const std::string &when, int e)
-                : std::runtime_error(when + ": " + std::strerror(e))
+            Error(const std::string &when, int e) :
+                std::runtime_error(when + ": " + std::strerror(e)),
+                errno_was(e)
+            {}
+            const int errno_was;
+    };
+
+    class IOError : public Error
+    {
+        public:
+            IOError(const std::string &msg)
+                : Error(msg)
+            {}
+            IOError(const std::string &msg, int e)
+                : Error(msg, e)
             {}
     };
 
