@@ -37,8 +37,8 @@ namespace
 namespace spg::gopher::request
 {
     Request::Request(const char* line, size_t len) :
-        path(split_path(line, len)),
-        selector(path.size() > 0 ? path.front() : ROOT_SELECTOR)
+        query(split_path(line, len)),
+        selector(query.size() > 0 ? query.front() : ROOT_SELECTOR)
     {
     }
 }

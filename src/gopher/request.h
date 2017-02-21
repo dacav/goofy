@@ -11,7 +11,7 @@ namespace spg::gopher::request
         public:
             Request(const char* selector, size_t len);
 
-            const std::vector<std::string> path;
+            const std::vector<std::string> query;
             const std::string& selector;
     };
 

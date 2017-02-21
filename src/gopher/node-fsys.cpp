@@ -4,6 +4,8 @@
 #include <cstring>
 
 #include "proto.h"
+#include "error.h"
+#include "map.h"
 
 namespace spg::gopher
 {
@@ -27,12 +29,48 @@ namespace spg::gopher
     {
     }
 
+    std::string NodeFSys::resolve_path(
+            const std::string& base,
+            const request::Request& request)
+    {
+        auto cursor = request.query.cbegin();
+        cursor ++; // skip selector
+
+        size_t len = base.length();
+        while (cursor != request.query.cend()) {
+            len += 1 + cursor->length();
+            cursor ++;
+        }
+
+        std::string out;
+        out.reserve(len);
+        out += base;
+        cursor = request.query.cbegin();
+        cursor ++; // skip selector
+        while (cursor != request.query.cend()) {
+            out += '/';
+            out += *cursor;
+
+            if (*cursor == "..") {
+                throw LookupFailure(out);
+            }
+            cursor ++;
+        }
+
+        return out;
+    }
+
     std::unique_ptr<proto::Writer> NodeFSys::make_writer(
             const WriteParams& wp,
             const request::Request& request)
     {
-        dir.reset(opendir(fsys_path.c_str()));
+        const std::string path = resolve_path(fsys_path, request);
+
+        dir.reset(opendir(path.c_str()));
         if (dir.get() == nullptr) {
+            if (errno == ENOENT) {
+                throw LookupFailure(path);
+            }
             throw IOError("opendir", errno);
         }
 
@@ -44,7 +82,7 @@ namespace spg::gopher
             writer->insert(NodeInfo(
                 NT_DIRLIST,
                 entry,
-                info.selector + "/" + entry,
+                resolve_path(info.selector, request) + "/" + entry,
                 info.host,
                 info.port
             ));

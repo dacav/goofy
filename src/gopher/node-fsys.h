@@ -33,6 +33,10 @@ namespace spg::gopher
             const std::string fsys_path;
             std::unique_ptr<DIR, int(*)(DIR *)> dir;
 
+            static std::string resolve_path(
+                const std::string& base,
+                const request::Request& request
+            );
             const char* next_dir();
     };
 
