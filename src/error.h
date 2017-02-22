@@ -32,6 +32,15 @@ namespace spg
             {}
     };
 
+    class InternalError : public Error
+    {
+        public:
+            InternalError(const std::string& msg)
+                : Error(msg)
+            {
+            }
+    };
+
     class UserError : public Error
     {
         public:
@@ -43,4 +52,12 @@ namespace spg
             const char* error_name;
             const size_t error_name_len;
     };
+
+    class LookupFailure : public UserError
+    {
+        public:
+            LookupFailure(const std::string& selector)
+                : UserError("Lookup Failure", selector) {}
+    };
+
 }

@@ -69,7 +69,14 @@ namespace spg::gopher
         struct stat statbuf;
         /* NOTE: using stat, not lstat. Links are resolved automatically */
         if (stat(path.c_str(), &statbuf) == -1) {
-            throw IOError("stat", errno);
+            switch (errno) {
+                case ENOENT:
+                case ENAMETOOLONG:
+                case ENOTDIR:
+                    throw LookupFailure(path);
+                default:
+                    throw IOError("stat", errno);
+            }
         }
 
         switch (statbuf.st_mode & S_IFMT) {
@@ -80,8 +87,7 @@ namespace spg::gopher
             case S_IFDIR:
                 return NodeType::NT_DIRLIST;
             default:
-                // TODO: probably log something here...
-                return NodeType::NT_UNSUPPORTED;
+                throw BadNodeError(path);
         }
     }
 
@@ -89,9 +95,22 @@ namespace spg::gopher
             const WriteParams& wp,
             const request::Request& request)
     {
-        const std::string path = resolve_path(fsys_path, request);
+        std::string path = resolve_path(fsys_path, request);
 
-        // TODO: stat, possibly provide a file.
+        switch (auto type = type_of(path)) {
+            case NodeType::NT_DIRLIST:
+                path += '/';
+                return make_dir_writer(wp, request, path);
+            default:
+                throw InternalError(path + ": No support for " + char(type));
+        }
+    }
+
+    std::unique_ptr<proto::Writer> NodeFSys::make_dir_writer(
+            const WriteParams& wp,
+            const request::Request& request,
+            const std::string& path)
+    {
         dir.reset(opendir(path.c_str()));
         if (dir.get() == nullptr) {
             if (errno == ENOENT) {
@@ -105,13 +124,18 @@ namespace spg::gopher
 
         const char* entry = next_dir();
         while (entry) {
-            writer->insert(NodeInfo(
-                type_of(path + "/" + entry),
-                entry,
-                resolve_path(info.selector, request) + "/" + entry,
-                info.host,
-                info.port
-            ));
+            try {
+                writer->insert(NodeInfo(
+                    type_of(path + "/" + entry),
+                    entry,
+                    resolve_path(info.selector, request) + "/" + entry,
+                    info.host,
+                    info.port
+                ));
+            }
+            catch (BadNodeError& e) {
+                // TODO: log it and move along.
+            }
             entry = next_dir();
         }
 

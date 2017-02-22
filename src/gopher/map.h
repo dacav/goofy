@@ -21,12 +21,6 @@ namespace spg::gopher
             : MapError(std::string("Duplicated selector: ") + selector) {}
     };
 
-    class LookupFailure : public spg::UserError {
-        public:
-            LookupFailure(const std::string& selector)
-                : spg::UserError("Lookup Failure", selector) {}
-    };
-
     class Map
     {
         public:

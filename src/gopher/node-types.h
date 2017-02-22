@@ -6,7 +6,6 @@
 namespace spg::gopher
 {
     enum NodeType {
-        NT_UNSUPPORTED = 0,
         NT_PLAIN = '0',
         NT_DIRLIST = '1',
         NT_ERROR = '3',

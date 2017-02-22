@@ -12,6 +12,14 @@
 
 namespace spg::gopher
 {
+    class BadNodeError : public Error
+    {
+        public:
+            BadNodeError(const std::string& node) :
+                Error(node)
+            {
+            }
+    };
 
     class NodeFSys : public Node
     {
@@ -40,6 +48,12 @@ namespace spg::gopher
             );
 
             NodeType type_of(const std::string& path);
+
+            std::unique_ptr<Writer> make_dir_writer(
+                const WriteParams& wp,
+                const request::Request& request,
+                const std::string& path
+            );
 
             const char* next_dir();
     };
