@@ -11,6 +11,18 @@
 #include "error.h"
 #include "map.h"
 
+namespace
+{
+    class BadNodeError : public spg::Error
+    {
+        public:
+            BadNodeError(const std::string& node) :
+                Error(node)
+            {
+            }
+    };
+}
+
 namespace spg::gopher
 {
 
@@ -22,7 +34,7 @@ namespace spg::gopher
             const std::string& host,
             uint16_t port) :
         Node(
-            NodeType::NT_DIRLIST,
+            NodeType::NT_MENU,
             display_name,
             selector,
             host,
@@ -85,7 +97,7 @@ namespace spg::gopher
                 // text.
                 return NodeType::NT_PLAIN;
             case S_IFDIR:
-                return NodeType::NT_DIRLIST;
+                return NodeType::NT_MENU;
             default:
                 throw BadNodeError(path);
         }
@@ -98,7 +110,7 @@ namespace spg::gopher
         std::string path = resolve_path(fsys_path, request);
 
         switch (auto type = type_of(path)) {
-            case NodeType::NT_DIRLIST:
+            case NodeType::NT_MENU:
                 path += '/';
                 return make_dir_writer(wp, request, path);
             default:

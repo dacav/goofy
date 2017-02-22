@@ -11,7 +11,7 @@ namespace spg::gopher
                        const std::string& host,
                        uint16_t port) :
         Node(
-            NodeType::NT_DIRLIST,
+            NodeType::NT_MENU,
             display_name,
             selector,
             host,

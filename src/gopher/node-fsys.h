@@ -12,15 +12,6 @@
 
 namespace spg::gopher
 {
-    class BadNodeError : public Error
-    {
-        public:
-            BadNodeError(const std::string& node) :
-                Error(node)
-            {
-            }
-    };
-
     class NodeFSys : public Node
     {
         public:
