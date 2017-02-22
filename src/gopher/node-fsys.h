@@ -5,9 +5,10 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-#include "proto.h"
-#include "node.h"
 #include "map.h"
+#include "node-types.h"
+#include "node.h"
+#include "proto.h"
 
 namespace spg::gopher
 {
@@ -37,6 +38,9 @@ namespace spg::gopher
                 const std::string& base,
                 const request::Request& request
             );
+
+            NodeType type_of(const std::string& path);
+
             const char* next_dir();
     };
 
