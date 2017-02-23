@@ -110,7 +110,7 @@ namespace spg::gopher::proto
             spg::gopher::proto::Event ev_read;
 
             static void cb_read(int sock, short what, void *arg);
-            void next();
+            void schedule();
             void read_chunk(int sock);
             void reset();
     };
@@ -136,7 +136,7 @@ namespace spg::gopher::proto
         protected:
             virtual void write_chunk(int sock) = 0;
             virtual void before_write();
-            void next();
+            void schedule();
             const WriteParams write_params;
 
         private:

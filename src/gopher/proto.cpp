@@ -63,7 +63,7 @@ namespace spg::gopher::proto
         // TODO: Just not mentioned by the reference of libevent.
         // Try putting -1, see if this is really true.
         assert(ev_read.get() != nullptr);
-        next();
+        schedule();
     }
 
     void Reader::cb_read(int sock, short what, void *arg)
@@ -86,7 +86,7 @@ namespace spg::gopher::proto
         }
     }
 
-    void Reader::next()
+    void Reader::schedule()
     {
         if (event_add(ev_read.get(), &read_params.timeout) == -1) {
             IOError("event_add (EV_READ|EV_TIMEOUT)", errno);
@@ -126,7 +126,7 @@ namespace spg::gopher::proto
         }
 
         if (again) {
-            next();
+            schedule();
         }
     }
 
@@ -162,7 +162,7 @@ namespace spg::gopher::proto
         // TODO: Just not mentioned by the reference of libevent.
         // Try putting -1, see if this is really true.
         assert(ev_write.get() != nullptr);
-        next();
+        schedule();
     }
 
     void Writer::before_write()
@@ -190,7 +190,7 @@ namespace spg::gopher::proto
     }
 
     // TODO: rename as 'next_event' or 'wait_ready' or so...
-    void Writer::next()
+    void Writer::schedule()
     {
         if (event_add(ev_write.get(), &write_params.timeout) == -1) {
             // TODO: beware of throws
@@ -259,7 +259,7 @@ namespace spg::gopher::proto
 
         cursor += sent;
         if (cursor < buffer.size()) {
-            next();
+            schedule();
         }
         else {
             assert(cursor == buffer.size()); // never >
@@ -285,7 +285,7 @@ namespace spg::gopher::proto
         }
         to_send -= sent;
         if (to_send > 0) {
-            next();
+            schedule();
         }
         else {
             write_params.got_success();
