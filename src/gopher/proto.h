@@ -16,6 +16,7 @@
 #include "node-types.h"
 
 #include <event2/event.h>
+#include <sys/sendfile.h>
 
 namespace spg::gopher::proto
 {
@@ -161,6 +162,21 @@ namespace spg::gopher::proto
             std::vector<char> buffer;
             unsigned cursor;
 
+            virtual void write_chunk(int sock) override;
+    };
+
+    class FileWriter : public Writer
+    {
+        public:
+            FileWriter(const WriteParams& params, int fd);
+            ~FileWriter();
+
+        private:
+            int fdesc;
+            off_t offset;
+            size_t to_send;
+
+            static size_t file_size_bytes(int fd);
             virtual void write_chunk(int sock) override;
     };
 

@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 namespace spg::gopher::proto
 {
@@ -266,8 +267,48 @@ namespace spg::gopher::proto
         }
     }
 
-    ErrorWriter::ErrorWriter(const WriteParams& params,
-                             const UserError& e) :
+    FileWriter::FileWriter(
+            const WriteParams& params,
+            int fd) :
+        Writer(params),
+        fdesc(fd),
+        offset(0),
+        to_send(file_size_bytes(fd))
+    {
+    }
+
+    void FileWriter::write_chunk(int sock)
+    {
+        ssize_t sent = sendfile(sock, fdesc, &offset, to_send);
+        if (sent == -1) {
+            throw IOError("sendfile", errno);
+        }
+        to_send -= sent;
+        if (to_send > 0) {
+            next();
+        }
+        else {
+            write_params.got_success();
+        }
+    }
+
+    FileWriter::~FileWriter()
+    {
+        close(fdesc);
+    }
+
+    size_t FileWriter::file_size_bytes(int fd)
+    {
+        struct stat statbuf;
+        if (fstat(fd, &statbuf) == -1) {
+            throw IOError("fstat", errno);
+        }
+        return statbuf.st_size;
+    }
+
+    ErrorWriter::ErrorWriter(
+            const WriteParams& params,
+            const UserError& e) :
         MenuWriter(params)
     {
         const char* what = e.what();
