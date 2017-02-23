@@ -39,7 +39,7 @@ namespace spg::gopher
 
         while (i != end) {
             try {
-                writer->insert(map.lookup(*i).info);
+                writer->node(map.lookup(*i).info);
                 i ++;
             }
             catch (LookupFailure &e) {

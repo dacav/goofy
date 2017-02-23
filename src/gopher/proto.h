@@ -150,7 +150,15 @@ namespace spg::gopher::proto
     {
         public:
             MenuWriter(const WriteParams& params);
-            void insert(const NodeInfo& info);
+
+            void node(const NodeInfo& info);
+
+            void text(const char* msg, size_t len=0);
+            void text(const std::string& msg);
+
+            void error(const char* msg, size_t len=0);
+            void error(const std::string& msg);
+
             virtual void before_write() override;
 
         protected:

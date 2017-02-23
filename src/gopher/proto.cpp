@@ -209,7 +209,7 @@ namespace spg::gopher::proto
     {
     }
 
-    void MenuWriter::insert(const NodeInfo& info)
+    void MenuWriter::node(const NodeInfo& info)
     {
         append(info.type);
         append(info.display_name);
@@ -223,12 +223,38 @@ namespace spg::gopher::proto
         append('\n');
     }
 
+    void MenuWriter::text(const char* msg, size_t len)
+    {
+        const char eol[] = "\t\tinfo.host\t1\r\n";
+        append(char(NodeType::NT_INFO));
+        append(msg, len > 0 ? len : std::strlen(msg));
+        append(eol, sizeof(eol) - 1);
+    }
+
+    void MenuWriter::text(const std::string& msg)
+    {
+        text(msg.c_str(), msg.length());
+    }
+
+    void MenuWriter::error(const char* msg, size_t len)
+    {
+        const char eol[] = "\t\terror.host\t1\r\n";
+        append(char(NodeType::NT_ERROR));
+        append(msg, len > 0 ? len : std::strlen(msg));
+        append(eol, sizeof(eol) - 1);
+    }
+
+    void MenuWriter::error(const std::string& msg)
+    {
+        error(msg.c_str(), msg.length());
+    }
+
     void MenuWriter::before_write()
     {
         Writer::before_write();
 
-        const char* line = ".\r\n";
-        buffer.insert(buffer.end(), line, line + 3);
+        const char line[] = ".\r\n";
+        append(line, sizeof(line) - 1);
         buffer.shrink_to_fit();
     }
 
@@ -311,15 +337,8 @@ namespace spg::gopher::proto
             const UserError& e) :
         MenuWriter(params)
     {
-        const char* what = e.what();
-        const char eol[] = "\t\terror.host\t1\r\n";
-
-        append(NodeType::NT_ERROR);
-        append(e.error_name, e.error_name_len);
-        append(eol, sizeof(eol));
-        append(NodeType::NT_INFO);
-        append(what, std::strlen(what));
-        append(eol, sizeof(eol));
+        error(e.error_name, e.error_name_len);
+        text(e.what());
     }
 
 }

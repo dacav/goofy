@@ -125,7 +125,7 @@ namespace spg::gopher
         const char* entry = next_dir();
         while (entry) {
             try {
-                writer->insert(NodeInfo(
+                writer->node(NodeInfo(
                     type_of(path + "/" + entry),
                     entry,
                     resolve_path(info.selector, request) + "/" + entry,
