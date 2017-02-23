@@ -12,12 +12,10 @@ namespace spg
         public:
             Error(const std::string &msg) :
                 std::runtime_error(msg),
-                errno_was(0)
-            {}
+                errno_was(0) {}
             Error(const std::string &when, int e) :
                 std::runtime_error(when + ": " + std::strerror(e)),
-                errno_was(e)
-            {}
+                errno_was(e) {}
             const int errno_was;
     };
 
@@ -25,20 +23,23 @@ namespace spg
     {
         public:
             IOError(const std::string &msg)
-                : Error(msg)
-            {}
+                : Error(msg) {}
             IOError(const std::string &msg, int e)
-                : Error(msg, e)
-            {}
+                : Error(msg, e) {}
     };
 
     class InternalError : public Error
     {
         public:
             InternalError(const std::string& msg)
-                : Error(msg)
-            {
-            }
+                : Error(msg) {}
+    };
+
+    class BadNodeError : public InternalError
+    {
+        public:
+            BadNodeError(const std::string& node) :
+                InternalError(node) {}
     };
 
     class UserError : public Error

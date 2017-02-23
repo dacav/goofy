@@ -11,18 +11,6 @@
 #include "error.h"
 #include "map.h"
 
-namespace
-{
-    class BadNodeError : public spg::Error
-    {
-        public:
-            BadNodeError(const std::string& node) :
-                Error(node)
-            {
-            }
-    };
-}
-
 namespace spg::gopher
 {
 
