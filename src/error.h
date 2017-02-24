@@ -10,55 +10,53 @@ namespace spg
     class Error : public std::runtime_error
     {
         public:
-            Error(const std::string &msg) :
+            Error(const char* msg) :
                 std::runtime_error(msg),
                 errno_was(0) {}
-            Error(const std::string &when, int e) :
-                std::runtime_error(when + ": " + std::strerror(e)),
+            Error(const std::string &when, int e=0) :
+                std::runtime_error(
+                    e == 0
+                    ? when
+                    : when + ": " + std::strerror(e)
+                ),
                 errno_was(e) {}
             const int errno_was;
     };
 
-    class IOError : public Error
-    {
-        public:
-            IOError(const std::string &msg)
-                : Error(msg) {}
-            IOError(const std::string &msg, int e)
-                : Error(msg, e) {}
-    };
-
     class InternalError : public Error
     {
-        public:
-            InternalError(const std::string& msg)
-                : Error(msg) {}
+        protected:
+            InternalError(const char* msg, int e=0) :
+                Error(msg, e) {}
+            InternalError(const std::string& msg, int e=0) :
+                Error(msg, e) {}
     };
 
-    class BadNodeError : public InternalError
+    class IOError : public InternalError
     {
         public:
-            BadNodeError(const std::string& node) :
-                InternalError(node) {}
+            IOError(const char* operation, int e) :
+                InternalError(operation, e) {}
+            IOError(const std::string& msg, int e) :
+                InternalError(msg, e) {}
     };
 
     class UserError : public Error
     {
-        public:
-            UserError(const char* name, const std::string &msg) :
-                Error(msg),
-                error_name(name),
-                error_name_len(std::strlen(name))
-            {}
-            const char* error_name;
-            const size_t error_name_len;
+        protected:
+            UserError(const char* msg)
+                : Error(msg, 0) {}
+            UserError(const std::string& msg)
+                : Error(msg, 0) {}
     };
 
     class LookupFailure : public UserError
     {
         public:
-            LookupFailure(const std::string& selector)
-                : UserError("Lookup Failure", selector) {}
+            LookupFailure(const std::string& sel) :
+                UserError(std::string("Lookup Failure: ") + selector),
+                selector(sel) {}
+            const std::string selector;
     };
 
 }
