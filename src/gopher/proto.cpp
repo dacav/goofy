@@ -331,14 +331,4 @@ namespace spg::gopher::proto
         }
         return statbuf.st_size;
     }
-
-    ErrorWriter::ErrorWriter(
-            const WriteParams& params,
-            const UserError& e) :
-        MenuWriter(params)
-    {
-        error(e.error_name, e.error_name_len);
-        text(e.what());
-    }
-
 }

@@ -45,6 +45,25 @@ namespace spg::session
         drop_callback();
     }
 
+    void Session::show_error(
+            const spg::UserError& e,
+            spg::gopher::proto::MenuWriter& menu)
+    {
+        try {
+            throw e;
+        }
+        catch (LookupFailure& e) {
+            menu.error("Lookup failure");
+        }
+        catch (NodeFailure& e) {
+            menu.error("Node failure");
+        }
+        catch (...) {
+            menu.error("Error");
+        }
+        menu.text(e.what());
+    }
+
     bool Session::got_line(const char *line, size_t len)
     {
         gopher::request::Request request(line, len);
@@ -62,9 +81,9 @@ namespace spg::session
                                .make_writer(params, request);
         }
         catch (spg::UserError& e) {
-            // All the UserError kind of errors are handled by notifying the
-            // user. This includes lookup failures.
-            writer.reset(new gopher::proto::ErrorWriter(params, e));
+            auto menu = new spg::gopher::proto::MenuWriter(params);
+            writer.reset(menu);
+            show_error(e, *menu);
         }
         writer->write_to(clsock);
         return false; // no more read.

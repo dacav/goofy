@@ -52,6 +52,11 @@ namespace spg::session
             void got_timeout();
             void got_error(std::exception& e);
 
+            static void show_error(
+                const spg::UserError& e,
+                spg::gopher::proto::MenuWriter& menu
+            );
+
             gopher::proto::ReadParams read_params;
             gopher::proto::Reader reader;
             std::unique_ptr<gopher::proto::Writer> writer;

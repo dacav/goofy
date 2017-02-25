@@ -188,10 +188,4 @@ namespace spg::gopher::proto
             virtual void write_chunk(int sock) override;
     };
 
-    class ErrorWriter : public MenuWriter
-    {
-        public:
-            ErrorWriter(const WriteParams& params, const UserError& e);
-    };
-
 }

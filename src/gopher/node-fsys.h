@@ -19,7 +19,7 @@ namespace spg::gopher
                 const Map& map,
                 const std::string& display_name,
                 const std::string& selector,
-                const std::string& fsys_path,
+                const std::string& root_path,
                 const std::string& host,
                 uint16_t port
             );
@@ -30,23 +30,27 @@ namespace spg::gopher
             ) override;
 
         private:
-            const std::string fsys_path;
-            std::unique_ptr<DIR, int(*)(DIR *)> dir;
+            const std::string root_path;
 
-            static std::string resolve_path(
-                const std::string& base,
-                const request::Request& request
-            );
+            struct RequestData
+            {
+                const NodeType node_type;
+                const std::string fsys_path;
+                const std::string selector_path;
+                const std::string requested_path;
+            };
 
-            NodeType type_of(const std::string& path);
+            NodeType type_of(const std::string& requested_sub);
+            RequestData analyze_request(const request::Request& request);
 
-            std::unique_ptr<Writer> make_dir_writer(
+            std::unique_ptr<Writer> list_dir(
                 const WriteParams& wp,
-                const request::Request& request,
-                const std::string& path
+                const RequestData& paths
             );
-
-            const char* next_dir();
+            std::unique_ptr<Writer> send_file(
+                const WriteParams& wp,
+                const RequestData& paths
+            );
     };
 
 }

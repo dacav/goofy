@@ -35,9 +35,9 @@ namespace spg
     class IOError : public InternalError
     {
         public:
-            IOError(const char* operation, int e) :
+            IOError(const char* operation, int e=0) :
                 InternalError(operation, e) {}
-            IOError(const std::string& msg, int e) :
+            IOError(const std::string& msg, int e=0) :
                 InternalError(msg, e) {}
     };
 
@@ -54,9 +54,14 @@ namespace spg
     {
         public:
             LookupFailure(const std::string& sel) :
-                UserError(std::string("Lookup Failure: ") + selector),
-                selector(sel) {}
-            const std::string selector;
+                UserError(sel) {}
+    };
+
+    class NodeFailure : public UserError
+    {
+        public:
+            NodeFailure(const std::string& sel, const char* reason) :
+                UserError(sel + ": " + reason) {}
     };
 
 }
