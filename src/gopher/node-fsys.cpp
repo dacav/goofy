@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "proto.h"
 #include "error.h"
@@ -39,21 +40,24 @@ namespace
         std::string out;
         out.reserve(len);
         while (cursor != request.query.cend()) {
-            out += '/';
             out += *cursor;
             if (*cursor == "..") {
                 throw spg::LookupFailure(out);
             }
+            out += '/';
             cursor ++;
         }
+        out.pop_back();
 
         return out;
     }
 
-    spg::gopher::NodeType node_type_of(mode_t mode)
+    spg::gopher::NodeType node_type_of(const std::string& fsys_path)
     {
-        switch (mode & S_IFDIR) {
+        mode_t mode = mode_of(fsys_path);
+        switch (mode & S_IFMT) {
             case S_IFREG:
+                // TODO: mime types to determine specific types
                 return spg::gopher::NodeType::NT_PLAIN;
             case S_IFDIR:
                 return spg::gopher::NodeType::NT_MENU;
@@ -62,10 +66,6 @@ namespace
         }
     }
 
-    spg::gopher::NodeType node_type_of(const std::string& fsys_path)
-    {
-        return node_type_of(mode_of(fsys_path));
-    }
 }
 
 namespace spg::gopher
@@ -96,15 +96,17 @@ namespace spg::gopher
         std::string reqpath = requested_path(request);
 
         std::string fsys_path(root_path);
-        fsys_path += reqpath;
+        std::string selector_path(info.selector);
 
-        std::string selector_path = info.selector;
-        selector_path += '/';
-        selector_path += reqpath;
+        if (reqpath.length() > 0) {
+            fsys_path += reqpath;
+            selector_path += '/';
+            selector_path += reqpath;
+        }
 
         NodeType type;
         try {
-            type = node_type_of(mode_of(fsys_path));
+            type = node_type_of(fsys_path);
             if (type == NodeType::NT_MENU) {
                 fsys_path += '/';
                 selector_path += '/';
@@ -139,6 +141,8 @@ namespace spg::gopher
         switch (data.node_type) {
             case NodeType::NT_MENU:
                 return list_dir(wp, data);
+            case NodeType::NT_PLAIN:
+                return send_file(wp, data);
             default:
                 throw NodeFailure(data.selector_path, "not supported");
         }
@@ -185,12 +189,24 @@ namespace spg::gopher
                 ));
             }
             catch (IOError& e) {
+                writer->error("...");
                 // TODO: log and move along
             }
             entry = next_dir();
         }
 
         return out;
+    }
+
+    std::unique_ptr<proto::Writer> NodeFSys::send_file(
+            const WriteParams& wp,
+            const RequestData& data)
+    {
+        int fd = open(data.fsys_path.c_str(), O_RDONLY);
+        if (fd == -1) {
+            throw IOError("open", errno);
+        }
+        return std::unique_ptr<proto::Writer>(new proto::FileWriter(wp, fd));
     }
 
 }
