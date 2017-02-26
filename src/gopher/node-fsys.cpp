@@ -34,14 +34,21 @@ namespace
             len += 1 + cursor->length();
             cursor ++;
         }
+
+        std::string out;
+        if (len == 0) {
+            return out;
+        }
+
         cursor = request.query.cbegin();
         cursor ++; // skip selector
 
-        std::string out;
         out.reserve(len);
         while (cursor != request.query.cend()) {
-            out += *cursor;
-            if (*cursor == "..") {
+            const std::string& step = *cursor;
+
+            out += step;
+            if (step == ".." || step == ".") {
                 throw spg::LookupFailure(out);
             }
             out += '/';
