@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+#include <magic.h>
+
 #include "map.h"
 #include "node-types.h"
 #include "node.h"
@@ -12,11 +14,26 @@
 
 namespace spg::gopher
 {
+    class TypeGuesser
+    {
+        public:
+            TypeGuesser();
+            ~TypeGuesser();
+
+            NodeType type_of(const std::string& path) const;
+
+        private:
+            static bool matches(const char* got, const char* pattern);
+            NodeType type_of_file(const std::string& path) const;
+            magic_t magic;
+    };
+
     class NodeFSys : public Node
     {
         public:
             NodeFSys(
                 const Map& map,
+                const spg::gopher::TypeGuesser& type_guesser,
                 const std::string& display_name,
                 const std::string& selector,
                 const std::string& root_path,
@@ -31,6 +48,7 @@ namespace spg::gopher
 
         private:
             const std::string root_path;
+            const spg::gopher::TypeGuesser& type_guesser;
 
             struct RequestData
             {

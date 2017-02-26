@@ -9,7 +9,10 @@ namespace spg::gopher
         NT_PLAIN = '0',
         NT_MENU = '1',
         NT_ERROR = '3',
+        NT_BINARY = '9',
         NT_INFO = 'i',
+        NT_GIF = 'g',
+        NT_IMAGE = 'I',
     };
 
     struct NodeInfo {

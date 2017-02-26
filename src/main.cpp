@@ -53,6 +53,8 @@ namespace
             std::unique_ptr<spg::session::Session>
         > sessions;
 
+        spg::gopher::TypeGuesser type_guesser;
+
         void drop_session(unsigned session_id);
         spg::session::Session& new_session(int clsock);
         void start();
@@ -192,7 +194,8 @@ int main(int argc, char **argv)
         using namespace spg::gopher;
         auto& root = srv.gopher_map.mknode<NodeMenu>("root", "", "localhost", port);
         auto& l1 = srv.gopher_map.mknode<NodeMenu>("le boobs", "le_boobs", "localhost", port);
-        auto& l2 = srv.gopher_map.mknode<NodeFSys>("le boobies", "le_boobies", ".", "localhost", port);
+        auto& l2 = srv.gopher_map.mknode<NodeFSys>(srv.type_guesser,
+                "le boobies", "le_boobies", ".", "localhost", port);
         root.insert(l1);
         l1.insert(l2);
     }
