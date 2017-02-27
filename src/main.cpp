@@ -99,6 +99,7 @@ namespace
         sighandler.reset(evsignal_new(
             base_event.get(), SIGINT, cb_signal, this
         ));
+        signal(SIGPIPE, SIG_IGN);
         event_add(sighandler.get(), NULL);
     }
 
