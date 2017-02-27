@@ -111,16 +111,16 @@ namespace
     {
         using namespace std::placeholders;
 
-        const unsigned next_id = sessions.size();
+        assert(clsock != -1);
         std::unique_ptr<spg::session::Session> session(
             new spg::session::Session(
                 gopher_map,
-                std::bind(&Server::drop_session, this, next_id),
+                std::bind(&Server::drop_session, this, clsock),
                 clsock,
                 base_event.get()
             )
         );
-        auto out = sessions.emplace(next_id, std::move(session));
+        auto out = sessions.emplace(clsock, std::move(session));
         assert(out.second);
         return *session.get();
     }

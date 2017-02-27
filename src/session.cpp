@@ -38,10 +38,14 @@ namespace spg::session
         reader.read_from(sock); // FIXME: might throw IOError
     }
 
+    Session::~Session()
+    {
+        ::close(clsock);
+    }
+
     void Session::close()
     {
         ::shutdown(clsock, SHUT_RDWR);
-        clsock = -1;
         drop_callback();
     }
 

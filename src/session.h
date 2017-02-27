@@ -35,6 +35,7 @@ namespace spg::session
                 int clsock,
                 struct event_base*
             );
+            ~Session();
 
             Session(Session&&) = delete;
             Session(const Session&) = delete;
