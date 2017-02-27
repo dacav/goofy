@@ -81,8 +81,8 @@ namespace spg::gopher::proto
             }
         }
         else if (what & EV_TIMEOUT) {
-            reader.read_params.got_timeout();
             reader.reset();
+            reader.read_params.got_timeout();
         }
     }
 
