@@ -112,7 +112,7 @@ namespace spg::gopher::proto
             static void cb_read(int sock, short what, void *arg);
             void schedule();
             void read_chunk(int sock);
-            void reset();
+            void end();
     };
 
     /* Set of asynchornous callbacks and parameters for line-based reading */

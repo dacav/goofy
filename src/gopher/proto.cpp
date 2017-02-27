@@ -76,12 +76,12 @@ namespace spg::gopher::proto
                 reader.read_chunk(sock);
             }
             catch (std::exception& e) {
+                reader.end();
                 reader.read_params.got_error(e);
-                reader.reset();
             }
         }
         else if (what & EV_TIMEOUT) {
-            reader.reset();
+            reader.end();
             reader.read_params.got_timeout();
         }
     }
@@ -101,8 +101,8 @@ namespace spg::gopher::proto
         size_t size = spg::gopher::proto::read(sock, start, room);
 
         if (size == 0) {
+            end();
             read_params.got_eof();
-            reset();
             return;
         }
 
@@ -122,7 +122,7 @@ namespace spg::gopher::proto
                 &buffer[0],
                 newline - &buffer[0]
             );
-            reset();
+            end();
         }
 
         if (again) {
@@ -130,7 +130,7 @@ namespace spg::gopher::proto
         }
     }
 
-    void Reader::reset()
+    void Reader::end()
     {
         cursor = 0;
         ev_read.reset();
@@ -179,13 +179,13 @@ namespace spg::gopher::proto
                 writer.write_chunk(sock);
             }
             catch (std::exception& e) {
-                writer.write_params.got_error(e);
                 writer.end();
+                writer.write_params.got_error(e);
             }
         }
         else if (what & EV_TIMEOUT) {
-            writer.write_params.got_timeout();
             writer.end();
+            writer.write_params.got_timeout();
         }
     }
 
