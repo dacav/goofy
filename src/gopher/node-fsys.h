@@ -65,6 +65,10 @@ namespace spg::gopher
                 const WriteParams& wp,
                 const RequestData& paths
             );
+
+            static bool hidden(const char* name);
+            static const char* next_entry(DIR* dir);
+
             std::unique_ptr<Writer> send_file(
                 const WriteParams& wp,
                 const RequestData& paths

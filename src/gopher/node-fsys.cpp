@@ -220,23 +220,10 @@ namespace spg::gopher
         }
         std::unique_ptr<DIR, int(*)(DIR*)> raii_close(dir, closedir);
 
-        auto next_dir = [dir]{
-            errno = 0;
-            struct dirent* dirent = readdir(dir);
-            const char* out = nullptr;
-            if (dirent != nullptr) {
-                out = dirent->d_name;
-            }
-            else if (errno != 0) {
-                throw IOError("readdir", errno);
-            }
-            return out;
-        };
-
         proto::MenuWriter* writer = new proto::MenuWriter(wp);
         std::unique_ptr<proto::Writer> out(writer);
 
-        const char* entry = next_dir();
+        const char* entry = next_entry(dir);
         spg::gopher::TypeGuesser tg;
         while (entry) {
             try {
@@ -252,7 +239,35 @@ namespace spg::gopher
                 writer->error("...");
                 // TODO: log and move along
             }
-            entry = next_dir();
+            entry = next_entry(dir);
+        }
+
+        return out;
+    }
+
+    bool NodeFSys::hidden(const char* name)
+    {
+        assert(name != nullptr);
+        assert(name[0] != '\0');
+        return name[0] == '.';  // includes '.', '..' and dotfiles.
+    }
+
+    const char* NodeFSys::next_entry(DIR* dir)
+    {
+        const char* out = nullptr;
+
+        while (out == nullptr || hidden(out)) {
+            errno = 0;
+            struct dirent* ent = readdir(dir);
+            if (ent != nullptr) {
+                out = ent->d_name;
+            }
+            else if (errno != 0) {
+                throw IOError("readdir", errno);
+            }
+            else {
+                return nullptr;
+            }
         }
 
         return out;
