@@ -2,7 +2,7 @@
 #include <arpa/inet.h>
 #include <cassert>
 
-#include "../error.h"
+#include "error.h"
 
 namespace
 {
@@ -57,27 +57,22 @@ namespace
 
 } // anon namespace
 
-namespace spg::parse
+namespace spg::settings
 {
 
-    struct sockaddr* ipaddr (
-            struct sockaddr_storage &storage,
-            const char* address,
-            uint16_t port)
+    struct sockaddr_storage mkaddr(const char* address, uint16_t port)
     {
+        struct sockaddr_storage storage;
         if (parse4(storage, address, port) == nullptr
                 && parse6(storage, address, port) == nullptr) {
             throw spg::Error(std::string("Cannot parse address: ") + address);
         }
-        return reinterpret_cast<struct sockaddr*>(&storage);
+        return storage;
     }
- 
-    struct sockaddr* ipaddr (
-            struct sockaddr_storage &storage,
-            const std::string& address,
-            uint16_t port)
+
+    struct sockaddr_storage mkaddr(const std::string& address, uint16_t port)
     {
-        return ipaddr(storage, address.c_str(), port);
+        return mkaddr(address.c_str(), port);
     }
 
 }
