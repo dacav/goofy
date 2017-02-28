@@ -13,10 +13,12 @@ namespace spg::session
 {
 
     Session::Session(
+            const spg::settings::Settings& sets,
             spg::gopher::Map& map,
             const DropCallback& drop_cb,
             int sock,
             struct event_base *ev_base) :
+        settings(sets),
         gopher_map(map),
         drop_callback(drop_cb),
         clsock(sock),

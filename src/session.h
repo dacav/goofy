@@ -9,6 +9,7 @@
 
 #include "gopher/proto.h"
 #include "gopher/map.h"
+#include "settings.h"
 #include "error.h"
 
 namespace spg::session
@@ -30,6 +31,7 @@ namespace spg::session
             using DropCallback = std::function<void()>;
 
             Session(
+                const spg::settings::Settings& settings,
                 spg::gopher::Map& gopher_map,
                 const DropCallback& drop_callback,
                 int clsock,
@@ -43,6 +45,7 @@ namespace spg::session
             void operator=(Session&&) = delete;
 
         private:
+            const spg::settings::Settings& settings;
             gopher::Map& gopher_map;
             DropCallback drop_callback;
 

@@ -28,6 +28,7 @@ namespace
         Server(const spg::settings::Settings& settings);
 
         spg::gopher::Map gopher_map;
+        const spg::settings::Settings& settings;
 
         std::unique_ptr<
             struct event_base,
@@ -70,7 +71,8 @@ namespace
                 void *ctx);
     };
 
-    Server::Server(const spg::settings::Settings& settings) :
+    Server::Server(const spg::settings::Settings& sets) :
+        settings(sets),
         base_event(event_base_new(), event_base_free),
         tcp_listener(nullptr, evconnlistener_free),
         sighandler(nullptr, event_free)
@@ -110,6 +112,7 @@ namespace
         assert(clsock != -1);
         std::unique_ptr<spg::session::Session> session(
             new spg::session::Session(
+                settings,
                 gopher_map,
                 std::bind(&Server::drop_session, this, clsock),
                 clsock,
