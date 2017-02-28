@@ -16,9 +16,10 @@ namespace spg::gopher
                 : spg::Error(msg) {}
     };
 
-    class Duplicated : public MapError {
-        Duplicated(const std::string& selector)
-            : MapError(std::string("Duplicated selector: ") + selector) {}
+    class DuplicatedError : public MapError {
+        public:
+            DuplicatedError(const std::string& selector)
+                : MapError(std::string("Duplicated selector: ") + selector) {}
     };
 
     class Map

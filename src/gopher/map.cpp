@@ -19,19 +19,16 @@ namespace spg::gopher
     std::unique_ptr<Node>& Map::insert(Node *item)
     {
         const std::string &selector = item->info.selector;
-        decltype(nodes)::iterator ins;
-        bool success;
+        std::unique_ptr<Node> item_ptr(item);
 
-        std::tie(ins, success) = nodes.emplace(selector, item);
-
-        if (success) {
+        if (nodes.find(selector) == nodes.end()) {
+            auto& new_ptr = nodes[selector];
+            new_ptr = std::move(item_ptr);
             maxlen = std::max(selector.length(), maxlen);
-            return ins->second;
+            return new_ptr;
         }
         else {
-            MapError e(selector);
-            delete item;
-            throw e;
+            throw DuplicatedError(selector);
         }
     }
 
