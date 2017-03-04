@@ -34,9 +34,9 @@ namespace spg::gopher
             NodeFSys(
                 const Map& map,
                 const spg::gopher::TypeGuesser& type_guesser,
+                const std::string& root_path,
                 const std::string& display_name,
                 const std::string& selector,
-                const std::string& root_path,
                 const std::string& host,
                 uint16_t port
             );

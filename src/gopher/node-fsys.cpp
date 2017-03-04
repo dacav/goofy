@@ -125,9 +125,9 @@ namespace spg::gopher
     NodeFSys::NodeFSys(
             const Map& map,
             const spg::gopher::TypeGuesser& tguess,
+            const std::string& path,
             const std::string& display_name,
             const std::string& selector,
-            const std::string& path,
             const std::string& host,
             uint16_t port) :
         Node(
