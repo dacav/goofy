@@ -1,20 +1,19 @@
 #include "str.h"
 #include "../error.h"
 
+#include <algorithm>
+
 namespace spg::util
 {
-    StrRef::StrRef(const std::string& s, size_t offs) :
-        StrRef(s.c_str(), 0, s.length())
-    {}
-
-    StrRef::StrRef(const std::string& s, size_t offs, size_t len) :
-        StrRef(s.c_str(), offs, len)
-    {}
-
-    StrRef::StrRef(const char* s, size_t offs, size_t l) :
-        start(s + offs),
+    StrRef::StrRef(const char* s, size_t l) :
+        start(s),
         len(l)
     {}
+
+    std::string StrRef::as_string() const
+    {
+        return std::string(start, len);
+    }
 
     std::list<StrRef> tokenize(const std::string& str, char sep)
     {
@@ -23,7 +22,7 @@ namespace spg::util
             if (c == sep) count ++;
         }
         if (count == 0) {
-            return {StrRef(str)};
+            return {StrRef(str.c_str(), str.length())};
         }
 
         std::list<StrRef> out;
@@ -33,10 +32,10 @@ namespace spg::util
             offs = str.find_first_of(sep, start);
             const size_t len = offs - start;
 
-            out.emplace_back(str, start, len);
+            out.emplace_back(str.c_str() + start, len);
             offs += 1; // skip sep
         }
-        out.emplace_back(str, offs, str.length() - offs);
+        out.emplace_back(str.c_str() + offs, str.length() - offs);
 
         return out;
     }
