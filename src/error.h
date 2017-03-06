@@ -23,6 +23,15 @@ namespace spg
             const int errno_was;
     };
 
+    class ConfigError : public Error
+    {
+        public:
+            ConfigError(const char* operation, int e=0) :
+                Error(operation, e) {}
+            ConfigError(const std::string& msg, int e=0) :
+                Error(msg, e) {}
+    };
+
     class InternalError : public Error
     {
         protected:
