@@ -25,13 +25,13 @@ namespace spg::gopher
     class Map
     {
         public:
-            Map();
-
+            Map() = default;
             Map(const Map&) = delete;
             Map(Map&&) = delete;
             void operator=(const Map&) = delete;
             void operator=(Map&&) = delete;
 
+            // Create new node and bind its selector for user lookup
             template <typename NodeT, typename... Args>
             NodeT& mknode(Args&&... args)
             {
@@ -41,13 +41,14 @@ namespace spg::gopher
                 );
             }
 
-            const size_t max_selector_length() const;
-
+            // User lookup, may throw LookupFailure
             Node& lookup(const std::string& selector) const;
 
         private:
+
+            // maps selectors to nodes, used for lookups, populated by
+            // mknode.
             std::map<std::string, std::unique_ptr<Node>> nodes;
-            size_t maxlen;
             std::unique_ptr<Node>& insert(Node *item);
     };
 }
