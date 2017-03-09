@@ -56,8 +56,11 @@ namespace spg::map_parser
             Parser parser;
 
             spg::util::Reader file_reader;
-            void got_node(const gopher::NodeInfo&);
+            void got_node(gopher::NodeInfo&&);
             void scan();
+
+            std::string virtual_selector_for(const std::string& path);
+            std::unordered_map<std::string, std::string> path_to_selector;
     };
 
 }

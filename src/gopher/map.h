@@ -2,6 +2,7 @@
 
 #include <map>
 #include <memory>
+#include <utility>
 
 #include <cstddef>
 
@@ -35,7 +36,7 @@ namespace spg::gopher
             template <typename NodeT, typename... Args>
             NodeT& mknode(Args&&... args)
             {
-                NodeT *node = new NodeT(*this, args...);
+                NodeT *node = new NodeT(*this, std::forward<Args>(args)...);
                 return dynamic_cast<NodeT &>(
                     *insert(dynamic_cast<Node*>(node))
                 );

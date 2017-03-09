@@ -2,6 +2,7 @@
 #include "error.h"
 
 #include "gopher/node-types.h"
+#include "gopher/node-gophermap.h"
 
 #include <deque>
 
@@ -115,10 +116,12 @@ namespace spg::map_parser
         // All other lines can be ignored: this is not node-gophermap...
     }
 
-    void Loader::got_node(const gopher::NodeInfo& info)
+    void Loader::got_node(gopher::NodeInfo&& info)
     {
-        std::cerr << "Got node: " << info.type << " sel=" << info.selector
-            << " disp=" << info.display_name << std::endl;
+        gopher_map.mknode<spg::gopher::NodeGopherMap>(
+            virtual_selector_for(info.selector),
+            std::move(info)
+        );
     }
 
     void Loader::scan()
@@ -126,6 +129,19 @@ namespace spg::map_parser
         while (!file_reader.eof()) {
             const auto line = file_reader.next();
             parser.parse_line(line);
+        }
+    }
+
+    std::string Loader::virtual_selector_for(const std::string& path)
+    {
+        auto seek = path_to_selector.find(path);
+        if (seek == path_to_selector.end()) {
+            std::string out = std::to_string(path_to_selector.size());
+            path_to_selector[path] = out;
+            return out;
+        }
+        else {
+            return seek->second;
         }
     }
 
