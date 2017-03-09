@@ -12,7 +12,7 @@ namespace spg::settings
     {
         sockaddr_storage bind_addr;
         uint16_t listen_port;
-        const std::string host_name;
+        std::string host_name;
         unsigned accept_backlog;
         bool sock_reusable;
     };

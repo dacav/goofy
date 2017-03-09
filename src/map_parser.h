@@ -6,8 +6,11 @@
 #include <unordered_map>
 
 #include "settings.h"
+
 #include "gopher/map.h"
+#include "gopher/node-menu.h"
 #include "gopher/node-types.h"
+
 #include "util/fileread.h"
 #include "util/str.h"
 
@@ -53,9 +56,11 @@ namespace spg::map_parser
         private:
             const spg::settings::Settings& settings;
             gopher::Map& gopher_map;
+            spg::gopher::NodeMenu& root_menu;
             Parser parser;
 
             spg::util::Reader file_reader;
+
             void got_node(gopher::NodeInfo&&);
             void scan();
 

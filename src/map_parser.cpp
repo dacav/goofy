@@ -33,6 +33,7 @@ namespace spg::map_parser
         }
         if (tokens.size() > 4) {
             if (on_text) on_text(line);
+            return;
         }
 
         char type;
@@ -60,6 +61,9 @@ namespace spg::map_parser
                 hostname = settings.host_name;
             }
             tokens.pop_front();
+        }
+        else {
+            hostname = settings.host_name;
         }
 
         uint16_t port = 70;
@@ -97,6 +101,9 @@ namespace spg::map_parser
             const char* filename) :
         settings(sets),
         gopher_map(gm),
+        root_menu(gopher_map.mknode<spg::gopher::NodeMenu>(
+            "root", "", settings.host_name, settings.listen_port
+        )),
         parser(
             settings,
             std::bind(&Loader::got_node, this, std::placeholders::_1)
@@ -118,10 +125,13 @@ namespace spg::map_parser
 
     void Loader::got_node(gopher::NodeInfo&& info)
     {
-        gopher_map.mknode<spg::gopher::NodeGopherMap>(
+        auto& node = gopher_map.mknode<spg::gopher::NodeGopherMap>(
             virtual_selector_for(info.selector),
             std::move(info)
         );
+        // if (topLevel) {
+        root_menu.insert(node);
+        // }
     }
 
     void Loader::scan()

@@ -189,11 +189,13 @@ int main(int argc, char **argv)
     settings.bind_addr = spg::settings::mkaddr("::1", settings.listen_port);
     settings.accept_backlog = 10;
     settings.sock_reusable = true;
+    settings.host_name = "localhost";
 
     Server srv(settings);
 
     spg::map_parser::Loader(settings, srv.gopher_map, "root.gophermap");
 
+#if 0
     {
         using namespace spg::gopher;
         auto& root = srv.gopher_map.mknode<NodeMenu>("root", "", "localhost", settings.listen_port);
@@ -203,6 +205,7 @@ int main(int argc, char **argv)
         root.insert(l1);
         l1.insert(l2);
     }
+#endif
 
     try {
         srv.start();
