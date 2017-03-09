@@ -24,6 +24,14 @@ namespace spg::gopher
             uint16_t port
         );
 
+        NodeInfo(
+            NodeType type,
+            std::string&& display_name,
+            std::string&& selector,
+            std::string&& host,
+            uint16_t port
+        );
+
         const char type;
         const std::string display_name;
         const std::string selector;
