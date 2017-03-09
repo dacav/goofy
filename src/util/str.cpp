@@ -5,37 +5,61 @@
 
 namespace spg::util
 {
+    StrRef::StrRef() :
+        StrRef(nullptr, 0)
+    {}
+
+    StrRef::StrRef(const StrRef& oth) :
+        StrRef(oth.start, oth.len)
+    {}
+
+    StrRef::StrRef(const std::string& s) :
+        StrRef(s.c_str(), s.length())
+    {}
+
     StrRef::StrRef(const char* s, size_t l) :
         start(s),
         len(l)
     {}
 
-    std::string StrRef::as_string() const
+    StrRef::operator std::string() const
     {
         return std::string(start, len);
     }
 
-    std::list<StrRef> tokenize(const std::string& str, char sep)
+    StrRef::operator bool() const
+    {
+        return start != nullptr;
+    }
+
+    std::list<StrRef> tokenize(const StrRef& str, char sep)
     {
         size_t count = 0;
-        for (const char& c : str) {
-            if (c == sep) count ++;
+        for (unsigned i = 0; i < str.len; i ++) {
+            if (str.start[i] == sep) count ++;
         }
         if (count == 0) {
-            return {StrRef(str.c_str(), str.length())};
+            return {str};
         }
 
         std::list<StrRef> out;
-        size_t offs = 0;
+        const char* cursor = str.start;
+        size_t remains = str.len;
         while (count --) {
-            const size_t start = offs;
-            offs = str.find_first_of(sep, start);
-            const size_t len = offs - start;
+            const char* end = (const char*) memchr(
+                (void *)cursor,
+                sep,
+                remains
+            );
+            const size_t len = end - cursor;
 
-            out.emplace_back(str.c_str() + start, len);
-            offs += 1; // skip sep
+            out.emplace_back(cursor, len);
+            cursor = end + 1;
+            remains -= len + 1;
         }
-        out.emplace_back(str.c_str() + offs, str.length() - offs);
+        if (remains) {
+            out.emplace_back(cursor, remains);
+        }
 
         return out;
     }
