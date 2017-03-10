@@ -14,6 +14,8 @@
 
 namespace spg::gopher
 {
+    mode_t mode_of(const std::string& fsys_path);
+
     class TypeGuesser
     {
         public:

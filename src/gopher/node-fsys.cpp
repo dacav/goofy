@@ -3,7 +3,6 @@
 #include <cerrno>
 #include <cstring>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -14,16 +13,6 @@
 
 namespace
 {
-    mode_t mode_of(const std::string& fsys_path)
-    {
-        struct stat statbuf;
-        /* NOTE: using stat, not lstat. Links are resolved automatically */
-        if (stat(fsys_path.c_str(), &statbuf) == -1) {
-            throw spg::IOError("stat", errno);
-        }
-        return statbuf.st_mode;
-    }
-
     std::string requested_path(const spg::gopher::request::Request& request)
     {
         auto cursor = request.query.cbegin();
@@ -62,6 +51,16 @@ namespace
 
 namespace spg::gopher
 {
+    mode_t mode_of(const std::string& fsys_path)
+    {
+        struct stat statbuf;
+        /* NOTE: using stat, not lstat. Links are resolved automatically */
+        if (stat(fsys_path.c_str(), &statbuf) == -1) {
+            throw spg::IOError("stat", errno);
+        }
+        return statbuf.st_mode;
+    }
+
     TypeGuesser::TypeGuesser() :
         magic(
             magic_open(
