@@ -5,11 +5,12 @@
 
 namespace spg::gopher
 {
-    NodeMenu::NodeMenu(const Map &m,
-                       const std::string& display_name,
-                       const std::string& selector,
-                       const std::string& host,
-                       uint16_t port) :
+    NodeMenu::NodeMenu(
+            const Map &m,
+            const std::string& display_name,
+            const std::string& selector,
+            const std::string& host,
+            uint16_t port) :
         Node(
             NodeType::NT_MENU,
             display_name,
