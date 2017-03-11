@@ -22,9 +22,14 @@ namespace spg::gopher
     {
     }
 
-    void NodeMenu::insert(const Node& item)
+    void NodeMenu::insert(const NodeInfo& info)
     {
-        subs.push_back(item.info.selector);
+        subs.push_back(info);
+    }
+
+    void NodeMenu::insert(const Node& node)
+    {
+        insert(node.info);
     }
 
     std::unique_ptr<gopher::proto::Writer> NodeMenu::make_writer(
@@ -35,17 +40,9 @@ namespace spg::gopher
 
         auto writer = new MenuWriter(wp);
         std::unique_ptr<Writer> out(writer);
-        auto end = subs.cend();
-        auto i = subs.begin();
 
-        while (i != end) {
-            try {
-                writer->node(map.lookup(*i).info);
-                i ++;
-            }
-            catch (LookupFailure &e) {
-                i = subs.erase(i);
-            }
+        for (const NodeInfo& info : subs) {
+            writer->node(info);
         }
 
         return out;

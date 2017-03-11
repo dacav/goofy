@@ -19,7 +19,8 @@ namespace spg::gopher
                      const std::string& host,
                      uint16_t port);
 
-            void insert(const Node& item);
+            void insert(const Node& node);
+            void insert(const NodeInfo& info);
 
             using WriteParams = gopher::proto::WriteParams;
             using Writer = gopher::proto::Writer;
@@ -30,6 +31,6 @@ namespace spg::gopher
 
         private:
             const Map& map;
-            std::list<std::string> subs;
+            std::list<NodeInfo> subs;
     };
 }
