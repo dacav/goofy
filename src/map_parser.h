@@ -20,12 +20,12 @@ namespace spg::map_parser
     {
         public:
             using GotTextCallback = std::function<void(std::string&&)>;
-            using GotNodeInfoCallback = std::function<void(gopher::NodeInfo&&)>;
+            using GotNodeInfoCallback = std::function<void(gopher::NodeInfo&&, bool)>;
             using GotEOFCallback = std::function<void(void)>;
 
             Parser(
                 const spg::settings::Settings& settings,
-                const GotNodeInfoCallback on_node=nullptr,
+                const GotNodeInfoCallback on_nodeinfo=nullptr,
                 const GotEOFCallback on_eof=nullptr,
                 const GotTextCallback on_text=nullptr
             );
@@ -34,7 +34,7 @@ namespace spg::map_parser
 
         private:
             const spg::settings::Settings& settings;
-            const GotNodeInfoCallback on_node;
+            const GotNodeInfoCallback on_nodeinfo;
             const GotEOFCallback on_eof;
             const GotTextCallback on_text;
     };
@@ -56,12 +56,13 @@ namespace spg::map_parser
         private:
             const spg::settings::Settings& settings;
             gopher::Map& gopher_map;
+            bool top_level;
             spg::gopher::NodeMenu& root_menu;
             Parser parser;
 
             spg::util::Reader file_reader;
 
-            void got_node(gopher::NodeInfo&&);
+            void got_nodeinfo(gopher::NodeInfo&&, bool local);
             void scan();
 
             std::string virtual_selector_for(const std::string& path);

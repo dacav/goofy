@@ -2,6 +2,7 @@
 #include "error.h"
 
 #include "gopher/node-types.h"
+#include "gopher/node-fsys.h"
 #include "gopher/node-gophermap.h"
 
 #include <deque>
@@ -15,7 +16,7 @@ namespace spg::map_parser
             const GotEOFCallback oe,
             const GotTextCallback ot) :
         settings(sets),
-        on_node(on),
+        on_nodeinfo(on),
         on_eof(oe),
         on_text(ot)
     {
@@ -52,18 +53,17 @@ namespace spg::map_parser
         std::string selector = tokens.front();
         tokens.pop_front();
 
+        bool local = true;
         std::string hostname;
         if (tokens.size() > 0) {
             if (tokens.front()) {
                 hostname = (std::string) tokens.front();
+                local = false;
             }
             else {
                 hostname = settings.host_name;
             }
             tokens.pop_front();
-        }
-        else {
-            hostname = settings.host_name;
         }
 
         uint16_t port = 70;
@@ -77,14 +77,17 @@ namespace spg::map_parser
             }
         }
 
-        if (on_node) {
-            on_node(gopher::NodeInfo(
-                gopher::NodeType(type),
-                std::move(display_name),
-                std::move(selector),
-                std::move(hostname),
-                port
-            ));
+        if (on_nodeinfo) {
+            on_nodeinfo(
+                gopher::NodeInfo(
+                    gopher::NodeType(type),
+                    std::move(display_name),
+                    std::move(selector),
+                    std::move(hostname),
+                    port
+                ),
+                local
+            );
         }
     }
 
@@ -101,12 +104,18 @@ namespace spg::map_parser
             const char* filename) :
         settings(sets),
         gopher_map(gm),
+        top_level(true),
         root_menu(gopher_map.mknode<spg::gopher::NodeMenu>(
-            "root", "", settings.host_name, settings.listen_port
+            "server root", "", settings.host_name, settings.listen_port
         )),
         parser(
             settings,
-            std::bind(&Loader::got_node, this, std::placeholders::_1)
+            std::bind(
+                &Loader::got_nodeinfo,
+                this,
+                std::placeholders::_1,
+                std::placeholders::_2
+            )
         )
     {
         file_reader.feed(filename);
@@ -123,15 +132,19 @@ namespace spg::map_parser
         // All other lines can be ignored: this is not node-gophermap...
     }
 
-    void Loader::got_node(gopher::NodeInfo&& info)
+    void Loader::got_nodeinfo(gopher::NodeInfo&& info, bool local)
     {
-        auto& node = gopher_map.mknode<spg::gopher::NodeGopherMap>(
-            virtual_selector_for(info.selector),
-            std::move(info)
-        );
-        // if (topLevel) {
-        root_menu.insert(node);
-        // }
+        if (local) {
+            try {
+                mode_t mode = spg::gopher::mode_of(info.selector);
+            }
+            catch (IOError& e) {
+                if (e.errno_was != ENOENT) throw;
+            }
+        }
+        else if (top_level) {
+            root_menu.insert(info);
+        }
     }
 
     void Loader::scan()
@@ -140,6 +153,7 @@ namespace spg::map_parser
             const auto line = file_reader.next();
             parser.parse_line(line);
         }
+        top_level = false;
     }
 
     std::string Loader::virtual_selector_for(const std::string& path)
