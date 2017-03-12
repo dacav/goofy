@@ -31,13 +31,18 @@ namespace spg::util
 
     StrRef Reader::next()
     {
+        FILE* f = input.get();
+        if (f == nullptr) {
+            return StrRef();
+        }
         errno = 0;
         ssize_t read = getline(&line, &len, input.get());
         if (read < 1) {
             if (read < 0 && errno != 0) {
                 throw IOError("getline", errno);
             }
-            return StrRef(nullptr, 0);
+            input.reset(nullptr);
+            return StrRef();
         }
 
         line[-- read] = 0; // chop
@@ -46,7 +51,7 @@ namespace spg::util
 
     bool Reader::eof() const
     {
-        FILE *f = input.get();
+        FILE* f = input.get();
         return f == nullptr ? true : feof(f);
     }
 
