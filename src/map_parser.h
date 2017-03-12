@@ -21,21 +21,18 @@ namespace spg::map_parser
         public:
             using GotTextCallback = std::function<void(std::string&&)>;
             using GotNodeInfoCallback = std::function<void(gopher::NodeInfo&&, bool)>;
-            using GotEOFCallback = std::function<void(void)>;
 
             Parser(
-                const spg::settings::Settings& settings,
+                const settings::Settings& settings,
                 const GotNodeInfoCallback on_nodeinfo=nullptr,
-                const GotEOFCallback on_eof=nullptr,
                 const GotTextCallback on_text=nullptr
             );
 
-            void parse_line(const spg::util::StrRef& ref);
+            void parse_line(const util::StrRef& ref) const;
 
         private:
-            const spg::settings::Settings& settings;
+            const settings::Settings& settings;
             const GotNodeInfoCallback on_nodeinfo;
-            const GotEOFCallback on_eof;
             const GotTextCallback on_text;
     };
 
@@ -43,24 +40,22 @@ namespace spg::map_parser
     {
         public:
             Loader(
-                const spg::settings::Settings& settings,
+                const settings::Settings& settings,
                 gopher::Map& gopher_map,
                 const char* filename
             );
             Loader(
-                const spg::settings::Settings& settings,
+                const settings::Settings& settings,
                 gopher::Map& gopher_map,
                 const std::string& filename
             );
 
         private:
-            const spg::settings::Settings& settings;
+            const settings::Settings& settings;
             gopher::Map& gopher_map;
-            bool top_level;
-            spg::gopher::NodeMenu& root_menu;
             Parser parser;
 
-            spg::util::Reader file_reader;
+            util::Reader file_reader;
 
             void got_nodeinfo(gopher::NodeInfo&&, bool local);
             void scan();

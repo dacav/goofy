@@ -6,7 +6,9 @@
 #include "node-types.h"
 #include "node.h"
 #include "proto.h"
+
 #include "../settings.h"
+#include "../map_parser.h"
 
 namespace spg::gopher
 {
@@ -29,6 +31,11 @@ namespace spg::gopher
         private:
             const settings::Settings& settings;
             const std::string file_path;
+            const map_parser::Parser map_parser;
+            std::unique_ptr<proto::MenuWriter> writer;
+
+            void got_text(std::string&&);
+            void got_nodeinfo(gopher::NodeInfo&&, bool);
     };
 
 }

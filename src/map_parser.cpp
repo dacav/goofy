@@ -11,21 +11,17 @@
 namespace spg::map_parser
 {
     Parser::Parser(
-            const spg::settings::Settings& sets,
+            const settings::Settings& sets,
             const GotNodeInfoCallback on,
-            const GotEOFCallback oe,
             const GotTextCallback ot) :
         settings(sets),
         on_nodeinfo(on),
-        on_eof(oe),
         on_text(ot)
     {
     }
 
-    void Parser::parse_line(const spg::util::StrRef& line)
+    void Parser::parse_line(const util::StrRef& line) const
     {
-        using namespace spg::util;
-
         auto tokens = tokenize(line, '\t');
 
         if (tokens.size() == 1) {
@@ -40,7 +36,7 @@ namespace spg::map_parser
         char type;
         std::string display_name;
         {
-            spg::util::StrRef& front = tokens.front();
+            util::StrRef& front = tokens.front();
             if (!front || front.len < 2) {
                 if (on_text) on_text(line);
             }
@@ -70,7 +66,7 @@ namespace spg::map_parser
         if (!tokens.empty()) {
             assert(tokens.size() == 1);
             try {
-                port = spg::util::strto<uint16_t>(tokens.front());
+                port = util::strto<uint16_t>(tokens.front());
             }
             catch (Error& e) {
                 throw ConfigError(std::string("Invalid port: ") + e.what());
@@ -92,22 +88,18 @@ namespace spg::map_parser
     }
 
     Loader::Loader(
-            const spg::settings::Settings& settings,
+            const settings::Settings& settings,
             gopher::Map& gopher_map,
             const std::string& filename) :
         Loader(settings, gopher_map, filename.c_str())
     {}
 
     Loader::Loader(
-            const spg::settings::Settings& sets,
+            const settings::Settings& sets,
             gopher::Map& gm,
             const char* filename) :
         settings(sets),
         gopher_map(gm),
-        top_level(true),
-        root_menu(gopher_map.mknode<spg::gopher::NodeMenu>(
-            "server root", "", settings.host_name, settings.listen_port
-        )),
         parser(
             settings,
             std::bind(
@@ -119,6 +111,17 @@ namespace spg::map_parser
         )
     {
         file_reader.feed(filename);
+
+        gopher_map.mknode<gopher::NodeGopherMap>(
+            filename,
+            gopher::NodeInfo(
+                gopher::NodeType::NT_MENU,
+                "root",
+                "",     // The first gophermap file is the server root.
+                settings.host_name,
+                settings.listen_port
+            )
+        );
         scan();
 
         // Goal: retrieve gopher links inside the file, and add them to the
@@ -134,16 +137,32 @@ namespace spg::map_parser
 
     void Loader::got_nodeinfo(gopher::NodeInfo&& info, bool local)
     {
-        if (local) {
-            try {
-                mode_t mode = spg::gopher::mode_of(info.selector);
-            }
-            catch (IOError& e) {
-                if (e.errno_was != ENOENT) throw;
+        if (!local) return; // remote servers don't need to be looked up
+
+        try {
+            mode_t mode = gopher::mode_of(info.selector);
+
+            switch (mode & S_IFMT) {
+                case S_IFREG:
+                    // TODO: here just assuming the file is a gophermap.
+                    // Probably wanna check more?
+                    gopher_map.mknode<gopher::NodeGopherMap>(
+                        virtual_selector_for(info.selector),
+                        std::move(info)
+                    );
+                    break;
+                case S_IFDIR:
+                    // TODO: mknode of a node-fsys
+                    break;
+                default:
+                    throw ConfigError(
+                        info.selector + ": Unsupported file type"
+                    );
             }
         }
-        else if (top_level) {
-            root_menu.insert(info);
+        catch (IOError& e) {
+            if (e.errno_was != ENOENT) throw;
+            // TODO: missing local resource. Log, don't crash.
         }
     }
 
@@ -153,7 +172,6 @@ namespace spg::map_parser
             const auto line = file_reader.next();
             parser.parse_line(line);
         }
-        top_level = false;
     }
 
     std::string Loader::virtual_selector_for(const std::string& path)
