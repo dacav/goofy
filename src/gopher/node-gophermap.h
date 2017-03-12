@@ -3,10 +3,10 @@
 #include <string>
 #include <functional>
 
-#include "map.h"
 #include "node-types.h"
 #include "node.h"
 #include "proto.h"
+#include "../settings.h"
 
 namespace spg::gopher
 {
@@ -14,7 +14,7 @@ namespace spg::gopher
     {
         public:
             NodeGopherMap(
-                const Map& map,
+                const settings::Settings& settings,
                 std::string&& file_path,
                 NodeInfo&& info
             );
@@ -27,7 +27,7 @@ namespace spg::gopher
             ) override;
 
         private:
-            const Map& map;
+            const settings::Settings& settings;
             const std::string file_path;
     };
 

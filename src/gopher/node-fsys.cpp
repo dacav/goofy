@@ -8,7 +8,6 @@
 
 #include "proto.h"
 #include "error.h"
-#include "map.h"
 
 namespace
 {
@@ -55,7 +54,7 @@ namespace spg::gopher
         struct stat statbuf;
         /* NOTE: using stat, not lstat. Links are resolved automatically */
         if (stat(fsys_path.c_str(), &statbuf) == -1) {
-            throw spg::IOError("stat", errno);
+            throw IOError("stat", errno);
         }
         return statbuf.st_mode;
     }
@@ -92,9 +91,9 @@ namespace spg::gopher
             case S_IFREG:
                 return type_of_file(path);
             case S_IFDIR:
-                return spg::gopher::NodeType::NT_MENU;
+                return gopher::NodeType::NT_MENU;
             default:
-                return spg::gopher::NodeType::NT_ERROR;
+                return gopher::NodeType::NT_ERROR;
         }
     }
 
@@ -108,35 +107,34 @@ namespace spg::gopher
         const char* magic_guess = magic_file(magic, path.c_str());
 
         if (matches(magic_guess, "text/")) {
-            return spg::gopher::NodeType::NT_PLAIN;
+            return gopher::NodeType::NT_PLAIN;
         }
         if (matches(magic_guess, "image/gif")) {
-            return spg::gopher::NodeType::NT_GIF;
+            return gopher::NodeType::NT_GIF;
         }
         if (matches(magic_guess, "image/")) {
-            return spg::gopher::NodeType::NT_IMAGE;
+            return gopher::NodeType::NT_IMAGE;
         }
 
-        return spg::gopher::NodeType::NT_BINARY;
+        return gopher::NodeType::NT_BINARY;
     }
 
     NodeFSys::NodeFSys(
-            const Map& map,
-            const spg::gopher::TypeGuesser& tguess,
+            const settings::Settings& sets,
+            const gopher::TypeGuesser& tguess,
             const std::string& path,
             const std::string& display_name,
-            const std::string& selector,
-            const std::string& host,
-            uint16_t port) :
+            const std::string& selector) :
         Node(
             NodeType::NT_MENU,
             display_name,
             selector,
-            host,
-            port
+            sets.host_name,
+            sets.listen_port
         ),
-        root_path(path.back() == '/' ? path : path + '/'),
-        type_guesser(tguess)
+        settings(sets),
+        type_guesser(tguess),
+        root_path(path.back() == '/' ? path : path + '/')
     {
         if ((mode_of(path) & S_IFMT) != S_IFDIR) {
             throw IOError(path + ": invalid root node", ENOTDIR);
@@ -222,7 +220,7 @@ namespace spg::gopher
         std::unique_ptr<proto::Writer> out(writer);
 
         const char* entry = next_entry(dir);
-        spg::gopher::TypeGuesser tg;
+        gopher::TypeGuesser tg;
         while (entry) {
             try {
                 writer->node(NodeInfo(

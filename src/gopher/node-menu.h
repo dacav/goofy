@@ -1,23 +1,25 @@
 #pragma once
 
-#include "node.h"
-#include "map.h"
-
 #include <string>
 #include <list>
 #include <ostream>
 #include <memory>
+
+#include "node.h"
+#include "../settings.h"
 
 namespace spg::gopher
 {
     class NodeMenu : public Node
     {
         public:
-            NodeMenu(const Map& map,
-                     const std::string& display_name,
-                     const std::string& selector,
-                     const std::string& host,
-                     uint16_t port);
+            NodeMenu(
+                const settings::Settings &settings,
+                const std::string& display_name,
+                const std::string& selector,
+                const std::string& host,
+                uint16_t port
+            );
 
             void insert(const Node& node);
             void insert(const NodeInfo& info);
@@ -30,7 +32,7 @@ namespace spg::gopher
             ) override;
 
         private:
-            const Map& map;
+            const settings::Settings& settings;
             std::list<NodeInfo> subs;
     };
 }

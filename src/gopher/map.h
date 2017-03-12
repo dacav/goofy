@@ -7,7 +7,8 @@
 #include <cstddef>
 
 #include "node.h"
-#include "error.h"
+#include "../error.h"
+#include "../settings.h"
 
 namespace spg::gopher
 {
@@ -26,7 +27,7 @@ namespace spg::gopher
     class Map
     {
         public:
-            Map() = default;
+            Map(const settings::Settings& settings);
             Map(const Map&) = delete;
             Map(Map&&) = delete;
             void operator=(const Map&) = delete;
@@ -36,7 +37,7 @@ namespace spg::gopher
             template <typename NodeT, typename... Args>
             NodeT& mknode(Args&&... args)
             {
-                NodeT *node = new NodeT(*this, std::forward<Args>(args)...);
+                NodeT *node = new NodeT(settings, std::forward<Args>(args)...);
                 return dynamic_cast<NodeT &>(
                     *insert(dynamic_cast<Node*>(node))
                 );
@@ -46,6 +47,7 @@ namespace spg::gopher
             Node& lookup(const std::string& selector) const;
 
         private:
+            const settings::Settings& settings;
 
             // maps selectors to nodes, used for lookups, populated by
             // mknode.

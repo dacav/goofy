@@ -28,8 +28,8 @@ namespace
     {
         Server(const spg::settings::Settings& settings);
 
-        spg::gopher::Map gopher_map;
         const spg::settings::Settings& settings;
+        spg::gopher::Map gopher_map;
 
         std::unique_ptr<
             struct event_base,
@@ -74,6 +74,7 @@ namespace
 
     Server::Server(const spg::settings::Settings& sets) :
         settings(sets),
+        gopher_map(settings),
         base_event(event_base_new(), event_base_free),
         tcp_listener(nullptr, evconnlistener_free),
         sighandler(nullptr, event_free)

@@ -8,10 +8,10 @@
 
 #include <magic.h>
 
-#include "map.h"
 #include "node-types.h"
 #include "node.h"
 #include "proto.h"
+#include "../settings.h"
 
 namespace spg::gopher
 {
@@ -35,13 +35,11 @@ namespace spg::gopher
     {
         public:
             NodeFSys(
-                const Map& map,
-                const spg::gopher::TypeGuesser& type_guesser,
+                const settings::Settings& settings,
+                const gopher::TypeGuesser& type_guesser,
                 const std::string& root_path,
                 const std::string& display_name,
-                const std::string& selector,
-                const std::string& host,
-                uint16_t port
+                const std::string& selector
             );
 
             virtual std::unique_ptr<Writer> make_writer(
@@ -50,8 +48,9 @@ namespace spg::gopher
             ) override;
 
         private:
+            const settings::Settings& settings;
+            const gopher::TypeGuesser& type_guesser;
             const std::string root_path;
-            const spg::gopher::TypeGuesser& type_guesser;
 
             struct RequestData
             {

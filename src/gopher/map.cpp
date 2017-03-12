@@ -4,6 +4,11 @@
 
 namespace spg::gopher
 {
+    Map::Map(const settings::Settings& sets) :
+        settings(sets)
+    {
+    }
+
     std::unique_ptr<Node>& Map::insert(Node *item)
     {
         const std::string &selector = item->info.selector;

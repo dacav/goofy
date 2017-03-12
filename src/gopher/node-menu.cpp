@@ -6,7 +6,7 @@
 namespace spg::gopher
 {
     NodeMenu::NodeMenu(
-            const Map &m,
+            const settings::Settings &sets,
             const std::string& display_name,
             const std::string& selector,
             const std::string& host,
@@ -18,7 +18,7 @@ namespace spg::gopher
             host,
             port
         ),
-        map(m)
+        settings(sets)
     {
     }
 

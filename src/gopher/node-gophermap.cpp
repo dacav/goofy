@@ -7,7 +7,7 @@ namespace spg::gopher
 {
 
     NodeGopherMap::NodeGopherMap(
-            const gopher::Map& m,
+            const settings::Settings& sets,
             std::string&& path,
             NodeInfo&& info) :
         Node(
@@ -17,7 +17,7 @@ namespace spg::gopher
             std::move(info.host),
             info.port
         ),
-        map(m),
+        settings(sets),
         file_path(std::move(path))
     {
         // assert isfile(file_path)
