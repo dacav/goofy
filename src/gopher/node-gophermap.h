@@ -15,7 +15,7 @@ namespace spg::gopher
         public:
             NodeGopherMap(
                 const Map& map,
-                std::string&& selector,
+                std::string&& file_path,
                 NodeInfo&& info
             );
 

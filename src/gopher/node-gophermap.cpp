@@ -8,17 +8,17 @@ namespace spg::gopher
 
     NodeGopherMap::NodeGopherMap(
             const gopher::Map& m,
-            std::string&& selector,
+            std::string&& path,
             NodeInfo&& info) :
         Node(
             NodeType::NT_MENU,
             std::move(info.display_name),
-            selector,
+            std::move(info.selector),
             std::move(info.host),
             info.port
         ),
         map(m),
-        file_path(std::move(info.selector))
+        file_path(std::move(path))
     {
         // assert isfile(file_path)
     }
