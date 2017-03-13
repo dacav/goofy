@@ -39,6 +39,7 @@ namespace spg::map_parser
     class VirtualPathsMap
     {
         public:
+            VirtualPathsMap(const std::string& root_path);
             bool is_mapped(const std::string& real_path) const;
             const std::string& virtual_path_of(const std::string& real_path);
 

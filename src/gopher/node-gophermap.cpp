@@ -58,8 +58,18 @@ namespace spg::gopher
 
     void NodeGopherMap::got_nodeinfo(gopher::NodeInfo&& node, bool local)
     {
-        // if local, yada
-        writer->node(node);
+        if (local) {
+            writer->node(NodeInfo(
+                NodeType(node.type), // TODO: fix this type
+                node.display_name,
+                vpaths->virtual_path_of(node.selector),
+                node.host,
+                node.port
+            ));
+        }
+        else {
+            writer->node(node);
+        }
     }
 
 }

@@ -33,6 +33,8 @@ namespace spg::map_parser
             return;
         }
 
+        assert(on_nodeinfo); // otherwise, what are you parsing for?
+
         char type;
         std::string display_name;
         {
@@ -56,13 +58,11 @@ namespace spg::map_parser
                 hostname = (std::string) tokens.front();
                 local = false;
             }
-            else {
-                hostname = settings.host_name;
-            }
             tokens.pop_front();
         }
+        if (local) hostname = settings.host_name;
 
-        uint16_t port = 70;
+        uint16_t port = local ? settings.listen_port : 70;
         if (!tokens.empty()) {
             assert(tokens.size() == 1);
             try {
@@ -73,18 +73,21 @@ namespace spg::map_parser
             }
         }
 
-        if (on_nodeinfo) {
-            on_nodeinfo(
-                gopher::NodeInfo(
-                    gopher::NodeType(type),
-                    std::move(display_name),
-                    std::move(selector),
-                    std::move(hostname),
-                    port
-                ),
-                local
-            );
-        }
+        on_nodeinfo(
+            gopher::NodeInfo(
+                gopher::NodeType(type),
+                std::move(display_name),
+                std::move(selector),
+                std::move(hostname),
+                port
+            ),
+            local
+        );
+    }
+
+    VirtualPathsMap::VirtualPathsMap(const std::string& root_path)
+    {
+        paths[root_path] = "";
     }
 
     bool VirtualPathsMap::is_mapped(const std::string& real_path) const
@@ -128,7 +131,7 @@ namespace spg::map_parser
                 std::placeholders::_2
             )
         ),
-        virtual_paths(std::make_shared<VirtualPathsMap>())
+        virtual_paths(std::make_shared<VirtualPathsMap>(filename))
     {
         file_reader.feed(filename);
 
