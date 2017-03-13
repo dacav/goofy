@@ -9,16 +9,17 @@ namespace spg::gopher
 
     NodeGopherMap::NodeGopherMap(
             const settings::Settings& sets,
-            std::string&& path,
-            NodeInfo&& info) :
+            const std::shared_ptr<map_parser::VirtualPathsMap>& vps,
+            const std::string& path) :
         Node(
             NodeType::NT_MENU,
-            std::move(info.display_name),
-            std::move(info.selector),
-            std::move(info.host),
-            info.port
+            "display", // Good for a flat map of the gophersite?
+            vps->virtual_path_of(path),
+            sets.host_name,
+            sets.listen_port
         ),
         settings(sets),
+        vpaths(vps),
         file_path(std::move(path)),
         map_parser(
             settings,

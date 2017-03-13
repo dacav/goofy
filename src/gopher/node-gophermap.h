@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <functional>
+#include <memory>
 
 #include "node-types.h"
 #include "node.h"
@@ -16,9 +16,9 @@ namespace spg::gopher
     {
         public:
             NodeGopherMap(
-                const settings::Settings& settings,
-                std::string&& file_path,
-                NodeInfo&& info
+                const settings::Settings& sets,
+                const std::shared_ptr<map_parser::VirtualPathsMap>& vpaths,
+                const std::string& path
             );
 
             virtual ~NodeGopherMap() = default;
@@ -30,6 +30,7 @@ namespace spg::gopher
 
         private:
             const settings::Settings& settings;
+            const std::shared_ptr<map_parser::VirtualPathsMap> vpaths;
             const std::string file_path;
             const map_parser::Parser map_parser;
             std::unique_ptr<proto::MenuWriter> writer;

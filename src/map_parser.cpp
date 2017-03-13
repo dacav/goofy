@@ -87,6 +87,25 @@ namespace spg::map_parser
         }
     }
 
+    bool VirtualPathsMap::is_mapped(const std::string& real_path) const
+    {
+        return paths.find(real_path) != paths.end();
+    }
+
+    const std::string& VirtualPathsMap::virtual_path_of(
+            const std::string& real_path)
+    {
+        auto found = paths.find(real_path);
+        if (found == paths.end()) {
+            auto iterator = paths.emplace_hint(
+                found,
+                std::make_pair(real_path, std::to_string(paths.size()))
+            );
+            return iterator->second; // the id
+        }
+        return found->second;
+    }
+
     Loader::Loader(
             const settings::Settings& settings,
             gopher::Map& gopher_map,
@@ -108,19 +127,14 @@ namespace spg::map_parser
                 std::placeholders::_1,
                 std::placeholders::_2
             )
-        )
+        ),
+        virtual_paths(std::make_shared<VirtualPathsMap>())
     {
         file_reader.feed(filename);
 
         gopher_map.mknode<gopher::NodeGopherMap>(
-            filename,
-            gopher::NodeInfo(
-                gopher::NodeType::NT_MENU,
-                "root",
-                "",     // The first gophermap file is the server root.
-                settings.host_name,
-                settings.listen_port
-            )
+            virtual_paths,
+            filename
         );
         scan();
 
@@ -146,17 +160,16 @@ namespace spg::map_parser
                 case S_IFREG:
                     // TODO: here just assuming the file is a gophermap.
                     // Probably wanna check more?
-                    gopher_map.mknode<gopher::NodeGopherMap>(
-                        virtual_selector_for(info.selector),
-                        std::move(info)
-                    );
+                    add_gopherfile(std::move(info));
                     break;
                 case S_IFDIR:
                     // TODO: mknode of a node-fsys
                     break;
                 default:
                     throw ConfigError(
-                        info.selector + ": Unsupported file type"
+                        info.selector
+                        + ": Unsupported file type. stat.st_mode : "
+                        + std::to_string(mode)
                     );
             }
         }
@@ -166,24 +179,21 @@ namespace spg::map_parser
         }
     }
 
+    void Loader::add_gopherfile(gopher::NodeInfo&& info)
+    {
+        if (!virtual_paths->is_mapped(info.selector)) {
+            gopher_map.mknode<gopher::NodeGopherMap>(
+                virtual_paths,
+                info.selector
+            );
+        }
+    }
+
     void Loader::scan()
     {
         while (!file_reader.eof()) {
             const auto line = file_reader.next();
             parser.parse_line(line);
-        }
-    }
-
-    std::string Loader::virtual_selector_for(const std::string& path)
-    {
-        auto seek = path_to_selector.find(path);
-        if (seek == path_to_selector.end()) {
-            std::string out = std::to_string(path_to_selector.size());
-            path_to_selector[path] = out;
-            return out;
-        }
-        else {
-            return seek->second;
         }
     }
 

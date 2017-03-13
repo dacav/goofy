@@ -36,6 +36,16 @@ namespace spg::map_parser
             const GotTextCallback on_text;
     };
 
+    class VirtualPathsMap
+    {
+        public:
+            bool is_mapped(const std::string& real_path) const;
+            const std::string& virtual_path_of(const std::string& real_path);
+
+        private:
+            std::unordered_map<std::string, std::string> paths;
+    };
+
     class Loader
     {
         public:
@@ -54,14 +64,12 @@ namespace spg::map_parser
             const settings::Settings& settings;
             gopher::Map& gopher_map;
             Parser parser;
-
             util::Reader file_reader;
+            std::shared_ptr<VirtualPathsMap> virtual_paths;
 
             void got_nodeinfo(gopher::NodeInfo&&, bool local);
+            void add_gopherfile(gopher::NodeInfo&& info);
             void scan();
-
-            std::string virtual_selector_for(const std::string& path);
-            std::unordered_map<std::string, std::string> path_to_selector;
     };
 
 }
