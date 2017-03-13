@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <utility>
 
@@ -51,7 +51,7 @@ namespace spg::gopher
 
             // maps selectors to nodes, used for lookups, populated by
             // mknode.
-            std::map<std::string, std::unique_ptr<Node>> nodes;
+            std::unordered_map<std::string, std::unique_ptr<Node>> nodes;
             std::unique_ptr<Node>& insert(Node *item);
     };
 }
