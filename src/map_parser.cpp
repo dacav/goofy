@@ -110,16 +110,9 @@ namespace spg::map_parser
     }
 
     Loader::Loader(
-            const settings::Settings& settings,
-            gopher::Map& gopher_map,
-            const std::string& filename) :
-        Loader(settings, gopher_map, filename.c_str())
-    {}
-
-    Loader::Loader(
             const settings::Settings& sets,
             gopher::Map& gm,
-            const char* filename) :
+            const std::string& filename) :
         settings(sets),
         gopher_map(gm),
         parser(

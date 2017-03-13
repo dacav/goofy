@@ -53,11 +53,6 @@ namespace spg::map_parser
             Loader(
                 const settings::Settings& settings,
                 gopher::Map& gopher_map,
-                const char* filename
-            );
-            Loader(
-                const settings::Settings& settings,
-                gopher::Map& gopher_map,
                 const std::string& filename
             );
 
