@@ -128,7 +128,7 @@ namespace spg::map_parser
     {
         file_reader.feed(filename);
 
-        gopher_map.mknode<gopher::NodeGopherMap>(
+        gopher_map.lookup_map.mknode<gopher::NodeGopherMap>(
             virtual_paths,
             filename
         );
@@ -187,7 +187,7 @@ namespace spg::map_parser
     void Loader::add_gopherfile(gopher::NodeInfo&& info)
     {
         if (!virtual_paths->is_mapped(info.selector)) {
-            gopher_map.mknode<gopher::NodeGopherMap>(
+            gopher_map.lookup_map.mknode<gopher::NodeGopherMap>(
                 virtual_paths,
                 info.selector
             );

@@ -4,12 +4,12 @@
 
 namespace spg::gopher
 {
-    Map::Map(const settings::Settings& sets) :
+    LookupMap::LookupMap(const settings::Settings& sets) :
         settings(sets)
     {
     }
 
-    std::unique_ptr<Node>& Map::insert(Node *item)
+    std::unique_ptr<Node>& LookupMap::insert(Node *item)
     {
         const std::string &selector = item->info.selector;
         std::unique_ptr<Node> item_ptr(item);
@@ -24,12 +24,17 @@ namespace spg::gopher
         }
     }
 
-    Node& Map::lookup(const std::string& selector) const
+    Node& LookupMap::lookup(const std::string& selector) const
     {
         auto ptr = nodes.find(selector);
         if (ptr == nodes.end()) {
             throw LookupFailure(selector);
         }
         return *(ptr->second);
+    }
+
+    Map::Map(const settings::Settings& settings) :
+        lookup_map(settings)
+    {
     }
 }

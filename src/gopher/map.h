@@ -24,14 +24,10 @@ namespace spg::gopher
                 : MapError(std::string("Duplicated selector: ") + selector) {}
     };
 
-    class Map
+    class LookupMap
     {
         public:
-            Map(const settings::Settings& settings);
-            Map(const Map&) = delete;
-            Map(Map&&) = delete;
-            void operator=(const Map&) = delete;
-            void operator=(Map&&) = delete;
+            LookupMap(const settings::Settings& settings);
 
             // Create new node and bind its selector for user lookup
             template <typename NodeT, typename... Args>
@@ -54,4 +50,17 @@ namespace spg::gopher
             std::unordered_map<std::string, std::unique_ptr<Node>> nodes;
             std::unique_ptr<Node>& insert(Node *item);
     };
+
+    class Map
+    {
+        public:
+            Map(const settings::Settings& settings);
+            Map(const Map&) = delete;
+            Map(Map&&) = delete;
+            void operator=(const Map&) = delete;
+            void operator=(Map&&) = delete;
+
+            LookupMap lookup_map;
+    };
+
 }
