@@ -159,7 +159,7 @@ namespace spg::map_parser
                     add_gopherfile(std::move(info));
                     break;
                 case S_IFDIR:
-                    // TODO: mknode of a node-fsys
+                    add_filesystem(std::move(info));
                     break;
                 default:
                     throw ConfigError(
@@ -172,6 +172,15 @@ namespace spg::map_parser
         catch (IOError& e) {
             if (e.errno_was != ENOENT) throw;
             // TODO: missing local resource. Log, don't crash.
+        }
+    }
+
+    void Loader::add_filesystem(gopher::NodeInfo&& info)
+    {
+        if (!virtual_paths->is_mapped(info.selector)) {
+            //gopher_map.mknode<gopher::NodeFSys>(
+            //    
+            //);
         }
     }
 

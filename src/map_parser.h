@@ -65,6 +65,7 @@ namespace spg::map_parser
 
             void got_nodeinfo(gopher::NodeInfo&&, bool local);
             void add_gopherfile(gopher::NodeInfo&& info);
+            void add_filesystem(gopher::NodeInfo&& info);
             void scan();
     };
 
