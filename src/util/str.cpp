@@ -22,6 +22,13 @@ namespace spg::util
         len(l)
     {}
 
+    StrRef& StrRef::operator=(const StrRef& other)
+    {
+        start = other.start;
+        len = other.len;
+        return *this;
+    }
+
     StrRef::operator std::string() const
     {
         return std::string(start, len);
@@ -30,6 +37,13 @@ namespace spg::util
     StrRef::operator bool() const
     {
         return start != nullptr;
+    }
+
+    StrRef& StrRef::operator++(int)
+    {
+        start += 1;
+        len --;
+        return *this;
     }
 
     std::list<StrRef> tokenize(const StrRef& str, char sep)

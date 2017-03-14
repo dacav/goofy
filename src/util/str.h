@@ -14,8 +14,11 @@ namespace spg::util
         StrRef(const char*, size_t);
         StrRef(const StrRef&);
 
-        const char* const start;
-        const size_t len;
+        StrRef& operator++(int);
+        StrRef& operator=(const StrRef&);
+
+        const char* start;
+        size_t len;
 
         operator std::string() const;
         operator bool() const;

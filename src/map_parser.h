@@ -19,12 +19,30 @@ namespace spg::map_parser
     class Parser
     {
         public:
-            using GotTextCallback = std::function<void(std::string&&)>;
-            using GotNodeInfoCallback = std::function<void(gopher::NodeInfo&&, bool)>;
+            struct LocalNode
+            {
+                char type;
+                spg::util::StrRef display_name;
+                spg::util::StrRef selector;
+            };
+            using GotLocalNodeCallback = std::function<void(const LocalNode&)>;
+
+            struct RemoteNode
+            {
+                char type;
+                spg::util::StrRef display_name;
+                spg::util::StrRef selector;
+                spg::util::StrRef hostname;
+                uint16_t port;
+            };
+            using GotRemoteNodeCallback = std::function<void(const RemoteNode&)>;
+
+            using GotTextCallback = std::function<void(const spg::util::StrRef&)>;
 
             Parser(
                 const settings::Settings& settings,
-                const GotNodeInfoCallback on_nodeinfo=nullptr,
+                const GotLocalNodeCallback on_local_node=nullptr,
+                const GotRemoteNodeCallback on_remote_node=nullptr,
                 const GotTextCallback on_text=nullptr
             );
 
@@ -32,7 +50,8 @@ namespace spg::map_parser
 
         private:
             const settings::Settings& settings;
-            const GotNodeInfoCallback on_nodeinfo;
+            const GotLocalNodeCallback on_local_node;
+            const GotRemoteNodeCallback on_remote_node;
             const GotTextCallback on_text;
     };
 
@@ -51,9 +70,9 @@ namespace spg::map_parser
             Parser parser;
             util::Reader file_reader;
 
-            void got_nodeinfo(gopher::NodeInfo&&, bool local);
-            void add_gopherfile(gopher::NodeInfo&& info);
-            void add_filesystem(gopher::NodeInfo&& info);
+            void got_local_node(const Parser::LocalNode&);
+            void add_gopherfile(const Parser::LocalNode&);
+            void add_filesystem(const Parser::LocalNode&);
             void scan();
     };
 

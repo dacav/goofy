@@ -12,10 +12,12 @@ namespace spg::map_parser
 {
     Parser::Parser(
             const settings::Settings& sets,
-            const GotNodeInfoCallback on,
+            const GotLocalNodeCallback oln,
+            const GotRemoteNodeCallback orn,
             const GotTextCallback ot) :
         settings(sets),
-        on_nodeinfo(on),
+        on_local_node(oln),
+        on_remote_node(orn),
         on_text(ot)
     {
     }
@@ -33,34 +35,32 @@ namespace spg::map_parser
             return;
         }
 
-        assert(on_nodeinfo); // otherwise, what are you parsing for?
-
-        char type;
-        std::string display_name;
-        {
-            util::StrRef& front = tokens.front();
-            if (!front || front.len < 2) {
-                if (on_text) on_text(line);
-            }
-
-            type = front.start[0];
-            display_name = std::string(front.start + 1, front.len - 1);
-            tokens.pop_front();
+        auto display_name = tokens.front();
+        if (!display_name || display_name.len < 2) {
+            // invalid display_name: too short. Must be at least two char.
+            // TODO: Probably we want to log this.
+            if (on_text) on_text(line);
         }
 
-        std::string selector = tokens.front();
+        // If false, what are you parsing for?
+        assert(on_local_node || on_remote_node);
+
+        char type = display_name.start[0];
+        display_name ++;
+        tokens.pop_front();
+
+        auto selector = tokens.front();
         tokens.pop_front();
 
         bool local = true;
-        std::string hostname;
+        util::StrRef hostname;
         if (tokens.size() > 0) {
             if (tokens.front()) {
-                hostname = (std::string) tokens.front();
+                hostname = tokens.front();
                 local = false;
             }
             tokens.pop_front();
         }
-        if (local) hostname = settings.host_name;
 
         uint16_t port = local ? settings.listen_port : 70;
         if (!tokens.empty()) {
@@ -73,16 +73,24 @@ namespace spg::map_parser
             }
         }
 
-        on_nodeinfo(
-            gopher::NodeInfo(
-                gopher::NodeType(type),
-                std::move(display_name),
-                std::move(selector),
-                std::move(hostname),
-                port
-            ),
-            local
-        );
+        if (local && on_local_node) {
+            LocalNode info = {
+                .type = type,
+                .display_name = display_name,
+                .selector = selector,
+            };
+            on_local_node(info);
+        }
+        if (!local && on_remote_node) {
+            RemoteNode info = {
+                .type = type,
+                .display_name = display_name,
+                .selector = selector,
+                .hostname = hostname,
+                .port = port,
+            };
+            on_remote_node(info);
+        }
     }
 
     Loader::Loader(
@@ -94,10 +102,9 @@ namespace spg::map_parser
         parser(
             settings,
             std::bind(
-                &Loader::got_nodeinfo,
+                &Loader::got_local_node,
                 this,
-                std::placeholders::_1,
-                std::placeholders::_2
+                std::placeholders::_1
             )
         )
     {
@@ -121,10 +128,8 @@ namespace spg::map_parser
         // All other lines can be ignored: this is not node-gophermap...
     }
 
-    void Loader::got_nodeinfo(gopher::NodeInfo&& info, bool local)
+    void Loader::got_local_node(const Parser::LocalNode& info)
     {
-        if (!local) return; // remote servers don't need to be looked up
-
         try {
             mode_t mode = gopher::mode_of(info.selector);
 
@@ -132,7 +137,7 @@ namespace spg::map_parser
                 case S_IFREG:
                     // TODO: here just assuming the file is a gophermap.
                     // Probably wanna check more?
-                    add_gopherfile(std::move(info));
+                    add_gopherfile((info));
                     break;
                 case S_IFDIR:
                     add_filesystem(std::move(info));
@@ -151,21 +156,21 @@ namespace spg::map_parser
         }
     }
 
-    void Loader::add_filesystem(gopher::NodeInfo&& info)
+    void Loader::add_filesystem(const Parser::LocalNode& localnode)
     {
-        if (gopher_map.paths_map.define(info.selector)) {
+        if (gopher_map.paths_map.define(localnode.selector)) {
             //gopher_map.mknode<gopher::NodeFSys>(
             //    
             //);
         }
     }
 
-    void Loader::add_gopherfile(gopher::NodeInfo&& info)
+    void Loader::add_gopherfile(const Parser::LocalNode& localnode)
     {
-        if (gopher_map.paths_map.define(info.selector)) {
+        if (gopher_map.paths_map.define(localnode.selector)) {
             gopher_map.lookup_map.mknode<gopher::NodeGopherMap>(
                 gopher_map.paths_map,
-                info.selector
+                localnode.selector
             );
         }
     }

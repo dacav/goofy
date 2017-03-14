@@ -51,9 +51,14 @@ namespace spg::gopher
 {
     mode_t mode_of(const std::string& fsys_path)
     {
+        return mode_of(fsys_path.c_str());
+    }
+
+    mode_t mode_of(const char* fsys_path)
+    {
         struct stat statbuf;
         /* NOTE: using stat, not lstat. Links are resolved automatically */
-        if (stat(fsys_path.c_str(), &statbuf) == -1) {
+        if (stat(fsys_path, &statbuf) == -1) {
             throw IOError("stat", errno);
         }
         return statbuf.st_mode;

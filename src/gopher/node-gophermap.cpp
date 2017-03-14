@@ -3,6 +3,7 @@
 #include "../map_parser.h"
 
 #include <array>
+using namespace std::placeholders;
 
 namespace spg::gopher
 {
@@ -23,13 +24,9 @@ namespace spg::gopher
         file_path(std::move(path)),
         map_parser(
             settings,
-            std::bind(&NodeGopherMap::got_nodeinfo, this,
-                std::placeholders::_1,
-                std::placeholders::_2
-            ),
-            std::bind(&NodeGopherMap::got_text, this,
-                std::placeholders::_1
-            )
+            std::bind(&NodeGopherMap::got_local_node, this, _1),
+            std::bind(&NodeGopherMap::got_remote_node, this, _1),
+            std::bind(&NodeGopherMap::got_text, this, _1)
         )
     {
         // assert isfile(file_path)
@@ -56,20 +53,26 @@ namespace spg::gopher
         writer->text(msg);
     }
 
-    void NodeGopherMap::got_nodeinfo(gopher::NodeInfo&& node, bool local)
+    void NodeGopherMap::got_remote_node(const RemoteNode& node)
     {
-        if (local) {
-            writer->node(NodeInfo(
-                NodeType(node.type), // TODO: fix this type
-                node.display_name,
-                vpaths.virtual_path_of(node.selector),
-                node.host,
-                node.port
-            ));
-        }
-        else {
-            writer->node(node);
-        }
+        writer->node(NodeInfo(
+            NodeType(node.type),
+            (std::string) node.display_name,
+            (std::string) node.selector,
+            (std::string) node.hostname,
+            node.port
+        ));
+    }
+
+    void NodeGopherMap::got_local_node(const LocalNode& node)
+    {
+        writer->node(NodeInfo(
+            NodeType(node.type),
+            (std::string) node.display_name,
+            vpaths.virtual_path_of(node.selector),
+            settings.host_name,
+            settings.listen_port
+        ));
     }
 
 }
