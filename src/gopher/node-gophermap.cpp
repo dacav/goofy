@@ -9,12 +9,12 @@ namespace spg::gopher
 
     NodeGopherMap::NodeGopherMap(
             const settings::Settings& sets,
-            const std::shared_ptr<map_parser::VirtualPathsMap>& vps,
+            const VirtualPathsMap& vps,
             const std::string& path) :
         Node(
             NodeType::NT_MENU,
             "display", // Good for a flat map of the gophersite?
-            vps->virtual_path_of(path),
+            vps.virtual_path_of(path),
             sets.host_name,
             sets.listen_port
         ),
@@ -62,7 +62,7 @@ namespace spg::gopher
             writer->node(NodeInfo(
                 NodeType(node.type), // TODO: fix this type
                 node.display_name,
-                vpaths->virtual_path_of(node.selector),
+                vpaths.virtual_path_of(node.selector),
                 node.host,
                 node.port
             ));

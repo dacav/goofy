@@ -51,6 +51,22 @@ namespace spg::gopher
             std::unique_ptr<Node>& insert(Node *item);
     };
 
+    class VirtualPathsMap
+    {
+        public:
+            VirtualPathsMap() = default;
+
+            bool define(
+                const std::string& real_path,
+                const char* define_as=nullptr
+            );
+
+            const std::string& virtual_path_of(const std::string& real_path) const;
+
+        private:
+            std::unordered_map<std::string, std::string> paths;
+    };
+
     class Map
     {
         public:
@@ -61,6 +77,7 @@ namespace spg::gopher
             void operator=(Map&&) = delete;
 
             LookupMap lookup_map;
+            VirtualPathsMap paths_map;
     };
 
 }

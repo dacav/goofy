@@ -33,8 +33,36 @@ namespace spg::gopher
         return *(ptr->second);
     }
 
+    bool VirtualPathsMap::define(
+            const std::string& real_path,
+            const char* define_as)
+    {
+        auto found = paths.find(real_path);
+        if (found != paths.end()) return false;
+
+        paths.emplace_hint(
+            found,
+            std::make_pair(
+                real_path,
+                define_as == nullptr
+                ? std::to_string(paths.size())
+                : std::string(define_as)
+            )
+        );
+        return true;
+    }
+
+    const std::string& VirtualPathsMap::virtual_path_of(
+            const std::string& real_path) const
+    {
+        auto found = paths.find(real_path);
+        assert(found != paths.end());
+        return found->second;
+    }
+
     Map::Map(const settings::Settings& settings) :
         lookup_map(settings)
     {
     }
+
 }

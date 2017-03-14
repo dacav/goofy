@@ -17,7 +17,7 @@ namespace spg::gopher
         public:
             NodeGopherMap(
                 const settings::Settings& sets,
-                const std::shared_ptr<map_parser::VirtualPathsMap>& vpaths,
+                const VirtualPathsMap& vpaths,
                 const std::string& path
             );
 
@@ -30,7 +30,7 @@ namespace spg::gopher
 
         private:
             const settings::Settings& settings;
-            const std::shared_ptr<map_parser::VirtualPathsMap> vpaths;
+            const VirtualPathsMap& vpaths;
             const std::string file_path;
             const map_parser::Parser map_parser;
             std::unique_ptr<proto::MenuWriter> writer;

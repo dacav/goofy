@@ -85,30 +85,6 @@ namespace spg::map_parser
         );
     }
 
-    VirtualPathsMap::VirtualPathsMap(const std::string& root_path)
-    {
-        paths[root_path] = "";
-    }
-
-    bool VirtualPathsMap::is_mapped(const std::string& real_path) const
-    {
-        return paths.find(real_path) != paths.end();
-    }
-
-    const std::string& VirtualPathsMap::virtual_path_of(
-            const std::string& real_path)
-    {
-        auto found = paths.find(real_path);
-        if (found == paths.end()) {
-            auto iterator = paths.emplace_hint(
-                found,
-                std::make_pair(real_path, std::to_string(paths.size()))
-            );
-            return iterator->second; // the id
-        }
-        return found->second;
-    }
-
     Loader::Loader(
             const settings::Settings& sets,
             gopher::Map& gm,
@@ -123,13 +99,13 @@ namespace spg::map_parser
                 std::placeholders::_1,
                 std::placeholders::_2
             )
-        ),
-        virtual_paths(std::make_shared<VirtualPathsMap>(filename))
+        )
     {
         file_reader.feed(filename);
 
+        gopher_map.paths_map.define(filename, ""); // root entry
         gopher_map.lookup_map.mknode<gopher::NodeGopherMap>(
-            virtual_paths,
+            gopher_map.paths_map,
             filename
         );
         scan();
@@ -177,7 +153,7 @@ namespace spg::map_parser
 
     void Loader::add_filesystem(gopher::NodeInfo&& info)
     {
-        if (!virtual_paths->is_mapped(info.selector)) {
+        if (gopher_map.paths_map.define(info.selector)) {
             //gopher_map.mknode<gopher::NodeFSys>(
             //    
             //);
@@ -186,9 +162,9 @@ namespace spg::map_parser
 
     void Loader::add_gopherfile(gopher::NodeInfo&& info)
     {
-        if (!virtual_paths->is_mapped(info.selector)) {
+        if (gopher_map.paths_map.define(info.selector)) {
             gopher_map.lookup_map.mknode<gopher::NodeGopherMap>(
-                virtual_paths,
+                gopher_map.paths_map,
                 info.selector
             );
         }
