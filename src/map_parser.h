@@ -70,12 +70,14 @@ namespace spg::map_parser
             Loader(
                 const settings::Settings& settings,
                 gopher::Map& gopher_map,
+                const gopher::GopherTypeGuesser& type_guesser,
                 const std::string& filename
             );
 
         private:
             const settings::Settings& settings;
             gopher::Map& gopher_map;
+            const gopher::GopherTypeGuesser& type_guesser;
             Parser parser;
             util::Reader file_reader;
 

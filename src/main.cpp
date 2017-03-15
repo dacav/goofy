@@ -194,19 +194,12 @@ int main(int argc, char **argv)
 
     Server srv(settings);
 
-    spg::map_parser::Loader(settings, srv.gopher_map, "root.gophermap");
-
-#if 0
-    {
-        using namespace spg::gopher;
-        auto& root = srv.gopher_map.mknode<NodeMenu>("root", "", "localhost", settings.listen_port);
-        auto& l1 = srv.gopher_map.mknode<NodeMenu>("le boobs", "le_boobs", "localhost", settings.listen_port);
-        auto& l2 = srv.gopher_map.mknode<NodeFSys>(srv.type_guesser,
-                ".", "le boobies", "le_boobies", "localhost", settings.listen_port);
-        root.insert(l1);
-        l1.insert(l2);
-    }
-#endif
+    spg::map_parser::Loader(
+        settings,
+        srv.gopher_map,
+        srv.type_guesser,
+        "root.gophermap"
+    );
 
     try {
         srv.start();

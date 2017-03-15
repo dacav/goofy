@@ -109,9 +109,11 @@ namespace spg::map_parser
     Loader::Loader(
             const settings::Settings& sets,
             gopher::Map& gm,
+            const gopher::GopherTypeGuesser& tg,
             const std::string& filename) :
         settings(sets),
         gopher_map(gm),
+        type_guesser(tg),
         parser(
             settings,
             std::bind(
