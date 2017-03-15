@@ -49,84 +49,9 @@ namespace
 
 namespace spg::gopher
 {
-    mode_t mode_of(const std::string& fsys_path)
-    {
-        return mode_of(fsys_path.c_str());
-    }
-
-    mode_t mode_of(const char* fsys_path)
-    {
-        struct stat statbuf;
-        /* NOTE: using stat, not lstat. Links are resolved automatically */
-        if (stat(fsys_path, &statbuf) == -1) {
-            throw IOError("stat", errno);
-        }
-        return statbuf.st_mode;
-    }
-
-    TypeGuesser::TypeGuesser() :
-        magic(
-            magic_open(
-                MAGIC_MIME
-                | MAGIC_SYMLINK
-                | MAGIC_NO_CHECK_CDF
-                | MAGIC_NO_CHECK_COMPRESS
-                | MAGIC_NO_CHECK_ELF
-                | MAGIC_NO_CHECK_TAR
-                | MAGIC_NO_CHECK_TOKENS
-            )
-        )
-    {
-        errno = 0; // not documented, but best effort.
-        if (magic == nullptr) {
-            throw IOError("magic_open", errno);
-        }
-        magic_load(magic, nullptr);
-    }
-
-    TypeGuesser::~TypeGuesser()
-    {
-        magic_close(magic);
-    }
-
-    NodeType TypeGuesser::type_of(const std::string& path) const
-    {
-        mode_t mode = mode_of(path);
-        switch (mode & S_IFMT) {
-            case S_IFREG:
-                return type_of_file(path);
-            case S_IFDIR:
-                return gopher::NodeType::NT_MENU;
-            default:
-                return gopher::NodeType::NT_ERROR;
-        }
-    }
-
-    bool TypeGuesser::matches(const char* got, const char* pattern)
-    {
-        return strstr(got, pattern) == got;
-    }
-
-    NodeType TypeGuesser::type_of_file(const std::string& path) const
-    {
-        const char* magic_guess = magic_file(magic, path.c_str());
-
-        if (matches(magic_guess, "text/")) {
-            return gopher::NodeType::NT_PLAIN;
-        }
-        if (matches(magic_guess, "image/gif")) {
-            return gopher::NodeType::NT_GIF;
-        }
-        if (matches(magic_guess, "image/")) {
-            return gopher::NodeType::NT_IMAGE;
-        }
-
-        return gopher::NodeType::NT_BINARY;
-    }
-
     NodeFSys::NodeFSys(
             const settings::Settings& sets,
-            const gopher::TypeGuesser& tguess,
+            const gopher::GopherTypeGuesser& tguess,
             const std::string& path,
             const std::string& display_name,
             const std::string& selector) :
@@ -141,7 +66,7 @@ namespace spg::gopher
         type_guesser(tguess),
         root_path(path.back() == '/' ? path : path + '/')
     {
-        if ((mode_of(path) & S_IFMT) != S_IFDIR) {
+        if ((util::mode_of(path) & S_IFMT) != S_IFDIR) {
             throw IOError(path + ": invalid root node", ENOTDIR);
         }
     }
@@ -225,7 +150,7 @@ namespace spg::gopher
         std::unique_ptr<proto::Writer> out(writer);
 
         const char* entry = next_entry(dir);
-        gopher::TypeGuesser tg;
+        gopher::GopherTypeGuesser tg;
         while (entry) {
             try {
                 writer->node(NodeInfo(

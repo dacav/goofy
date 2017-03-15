@@ -51,7 +51,7 @@ namespace
             std::unique_ptr<spg::session::Session>
         > sessions;
 
-        spg::gopher::TypeGuesser type_guesser;
+        spg::gopher::GopherTypeGuesser type_guesser;
 
         void drop_session(unsigned session_id);
         spg::session::Session& new_session(int clsock);

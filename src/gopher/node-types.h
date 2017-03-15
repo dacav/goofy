@@ -3,6 +3,8 @@
 #include <string>
 #include <cstdint>
 
+#include "../util/typeguesser.h"
+
 namespace spg::gopher
 {
     enum NodeType {
@@ -14,6 +16,18 @@ namespace spg::gopher
         NT_GIF = 'g',
         NT_IMAGE = 'I',
         NT_HYPERTEXT = 'h',
+    };
+
+    class GopherTypeGuesser : public util::TypeGuesser
+    {
+        public:
+            GopherTypeGuesser();
+
+            NodeType type_of(const std::string& path) const;
+
+        private:
+            static bool matches(const char* got, const char* pattern);
+            NodeType type_of_file(const std::string& path) const;
     };
 
     struct NodeInfo {

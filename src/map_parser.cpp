@@ -144,7 +144,7 @@ namespace spg::map_parser
     void Loader::got_local_node(const Parser::LocalNode& info)
     {
         try {
-            mode_t mode = gopher::mode_of(info.selector);
+            mode_t mode = util::mode_of(info.selector);
 
             switch (mode & S_IFMT) {
                 case S_IFREG:
