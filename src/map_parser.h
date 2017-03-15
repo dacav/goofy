@@ -37,12 +37,20 @@ namespace spg::map_parser
             };
             using GotRemoteNodeCallback = std::function<void(const RemoteNode&)>;
 
+            struct Url
+            {
+                spg::util::StrRef display_name;
+                spg::util::StrRef href;
+            };
+            using GotUrlCallback = std::function<void(const Url&)>;
+
             using GotTextCallback = std::function<void(const spg::util::StrRef&)>;
 
             Parser(
                 const settings::Settings& settings,
                 const GotLocalNodeCallback on_local_node=nullptr,
                 const GotRemoteNodeCallback on_remote_node=nullptr,
+                const GotUrlCallback on_url=nullptr,
                 const GotTextCallback on_text=nullptr
             );
 
@@ -52,6 +60,7 @@ namespace spg::map_parser
             const settings::Settings& settings;
             const GotLocalNodeCallback on_local_node;
             const GotRemoteNodeCallback on_remote_node;
+            const GotUrlCallback on_url;
             const GotTextCallback on_text;
     };
 

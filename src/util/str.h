@@ -15,6 +15,7 @@ namespace spg::util
         StrRef(const StrRef&);
 
         StrRef& operator++(int);
+        StrRef& operator+=(int offs);
         StrRef& operator=(const StrRef&);
 
         const char* start;

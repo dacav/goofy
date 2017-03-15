@@ -46,6 +46,13 @@ namespace spg::util
         return *this;
     }
 
+    StrRef& StrRef::operator+=(int offs)
+    {
+        start += offs;
+        len -= offs;
+        return *this;
+    }
+
     std::list<StrRef> tokenize(const StrRef& str, char sep)
     {
         size_t count = 0;

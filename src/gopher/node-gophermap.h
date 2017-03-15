@@ -35,7 +35,10 @@ namespace spg::gopher
             const map_parser::Parser map_parser;
             std::unique_ptr<proto::MenuWriter> writer;
 
-            void got_text(std::string&&);
+            void got_text(const std::string&);
+
+            using Url = map_parser::Parser::Url;
+            void got_url(const Url&);
 
             using RemoteNode = map_parser::Parser::RemoteNode;
             void got_remote_node(const RemoteNode&);

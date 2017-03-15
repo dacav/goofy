@@ -26,6 +26,7 @@ namespace spg::gopher
             settings,
             std::bind(&NodeGopherMap::got_local_node, this, _1),
             std::bind(&NodeGopherMap::got_remote_node, this, _1),
+            std::bind(&NodeGopherMap::got_url, this, _1),
             std::bind(&NodeGopherMap::got_text, this, _1)
         )
     {
@@ -48,9 +49,20 @@ namespace spg::gopher
         return std::unique_ptr<proto::Writer>(writer.release());
     }
 
-    void NodeGopherMap::got_text(std::string&& msg)
+    void NodeGopherMap::got_text(const std::string& msg)
     {
         writer->text(msg);
+    }
+
+    void NodeGopherMap::got_url(const Url& url)
+    {
+        writer->node(NodeInfo(
+            NodeType::NT_HYPERTEXT,
+            (std::string) url.display_name,
+            (std::string) url.href,
+            settings.host_name,
+            settings.listen_port
+        ));
     }
 
     void NodeGopherMap::got_remote_node(const RemoteNode& node)

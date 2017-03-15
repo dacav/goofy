@@ -13,6 +13,7 @@ namespace spg::gopher
         NT_INFO = 'i',
         NT_GIF = 'g',
         NT_IMAGE = 'I',
+        NT_HYPERTEXT = 'h',
     };
 
     struct NodeInfo {

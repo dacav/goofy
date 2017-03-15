@@ -14,10 +14,12 @@ namespace spg::map_parser
             const settings::Settings& sets,
             const GotLocalNodeCallback oln,
             const GotRemoteNodeCallback orn,
+            const GotUrlCallback ou,
             const GotTextCallback ot) :
         settings(sets),
         on_local_node(oln),
         on_remote_node(orn),
+        on_url(ou),
         on_text(ot)
     {
     }
@@ -40,6 +42,7 @@ namespace spg::map_parser
             // invalid display_name: too short. Must be at least two char.
             // TODO: Probably we want to log this.
             if (on_text) on_text(line);
+            return;
         }
 
         // If false, what are you parsing for?
@@ -51,6 +54,17 @@ namespace spg::map_parser
 
         auto selector = tokens.front();
         tokens.pop_front();
+
+        if (std::string(selector).find("URL:") == 0) {
+            if (on_url) {
+                Url url = {
+                    .display_name = display_name,
+                    .href = selector
+                };
+                on_url(url);
+            }
+            return;
+        }
 
         bool local = true;
         util::StrRef hostname;
