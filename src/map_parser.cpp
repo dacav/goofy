@@ -174,9 +174,12 @@ namespace spg::map_parser
     void Loader::add_filesystem(const Parser::LocalNode& localnode)
     {
         if (gopher_map.paths_map.define(localnode.selector)) {
-            //gopher_map.mknode<gopher::NodeFSys>(
-            //    
-            //);
+            gopher_map.lookup_map.mknode<gopher::NodeFSys>(
+                type_guesser,
+                localnode.selector,
+                localnode.display_name,
+                gopher_map.paths_map.virtual_path_of(localnode.selector)
+            );
         }
     }
 
