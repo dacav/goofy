@@ -7,7 +7,6 @@
 
 #include <deque>
 
-#include <iostream> 
 namespace spg::map_parser
 {
     Parser::Parser(
