@@ -71,7 +71,7 @@ namespace spg::gopher
         }
     }
 
-    NodeFSys::RequestData NodeFSys::analyze_request(const request::Request& request)
+    NodeFSys::RequestData NodeFSys::analyze_request(const request::Request& request) const
     {
         std::string reqpath = requested_path(request);
 
@@ -114,7 +114,7 @@ namespace spg::gopher
 
     std::unique_ptr<proto::Writer> NodeFSys::make_writer(
             const WriteParams& wp,
-            const request::Request& request)
+            const request::Request& request) const
     {
         const RequestData data = analyze_request(request);
 
@@ -135,7 +135,7 @@ namespace spg::gopher
 
     std::unique_ptr<proto::Writer> NodeFSys::list_dir(
             const WriteParams& wp,
-            const RequestData& data)
+            const RequestData& data) const
     {
         DIR* dir = opendir(data.fsys_path.c_str());
         if (dir == nullptr) {

@@ -29,7 +29,7 @@ namespace spg::gopher
             virtual std::unique_ptr<Writer> make_writer(
                 const WriteParams& wp,
                 const request::Request& req
-            ) override;
+            ) const override;
 
         private:
             const settings::Settings& settings;

@@ -26,25 +26,12 @@ namespace spg::gopher
             virtual std::unique_ptr<Writer> make_writer(
                 const WriteParams& wp,
                 const request::Request& request
-            ) override;
+            ) const override;
 
         private:
             const settings::Settings& settings;
             const VirtualPathsMap& vpaths;
             const std::string file_path;
-            const map_parser::Parser map_parser;
-            std::unique_ptr<proto::MenuWriter> writer;
-
-            void got_text(const std::string&);
-
-            using Url = map_parser::Parser::Url;
-            void got_url(const Url&);
-
-            using RemoteNode = map_parser::Parser::RemoteNode;
-            void got_remote_node(const RemoteNode&);
-
-            using LocalNode = map_parser::Parser::LocalNode;
-            void got_local_node(const LocalNode&);
     };
 
 }

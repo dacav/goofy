@@ -21,70 +21,60 @@ namespace spg::gopher
         ),
         settings(sets),
         vpaths(vps),
-        file_path(std::move(path)),
-        map_parser(
-            settings,
-            std::bind(&NodeGopherMap::got_local_node, this, _1),
-            std::bind(&NodeGopherMap::got_remote_node, this, _1),
-            std::bind(&NodeGopherMap::got_url, this, _1),
-            std::bind(&NodeGopherMap::got_text, this, _1)
-        )
+        file_path(std::move(path))
     {
         // assert isfile(file_path)
     }
 
     std::unique_ptr<proto::Writer> NodeGopherMap::make_writer(
             const proto::WriteParams& wp,
-            const request::Request& request)
+            const request::Request& request) const
     {
-        writer.reset(new proto::MenuWriter(wp));
+        proto::MenuWriter* writer = new proto::MenuWriter(wp);
+        std::unique_ptr<proto::Writer> out(writer);
 
         spg::util::Reader file_reader;
+
+        const map_parser::Parser map_parser(
+            settings,
+            [this, writer](const map_parser::Parser::LocalNode &node) {
+                writer->node(NodeInfo(
+                    NodeType(node.type),
+                    (std::string) node.display_name,
+                    vpaths.virtual_path_of(node.selector),
+                    settings.host_name,
+                    settings.listen_port
+                ));
+            },
+            [writer](const map_parser::Parser::RemoteNode& node) {
+                writer->node(NodeInfo(
+                    NodeType(node.type),
+                    (std::string) node.display_name,
+                    (std::string) node.selector,
+                    (std::string) node.hostname,
+                    node.port
+                ));
+            },
+            [this, writer](const map_parser::Parser::Url& url) {
+                writer->node(NodeInfo(
+                    NodeType::NT_HYPERTEXT,
+                    (std::string) url.display_name,
+                    (std::string) url.href,
+                    settings.host_name,
+                    settings.listen_port
+                ));
+            },
+            [writer](const util::StrRef& text) {
+                writer->text((std::string)text);
+            }
+        );
 
         file_reader.feed(file_path);
         while (!file_reader.eof()) {
             map_parser.parse_line(file_reader.next());
         }
 
-        return std::unique_ptr<proto::Writer>(writer.release());
-    }
-
-    void NodeGopherMap::got_text(const std::string& msg)
-    {
-        writer->text(msg);
-    }
-
-    void NodeGopherMap::got_url(const Url& url)
-    {
-        writer->node(NodeInfo(
-            NodeType::NT_HYPERTEXT,
-            (std::string) url.display_name,
-            (std::string) url.href,
-            settings.host_name,
-            settings.listen_port
-        ));
-    }
-
-    void NodeGopherMap::got_remote_node(const RemoteNode& node)
-    {
-        writer->node(NodeInfo(
-            NodeType(node.type),
-            (std::string) node.display_name,
-            (std::string) node.selector,
-            (std::string) node.hostname,
-            node.port
-        ));
-    }
-
-    void NodeGopherMap::got_local_node(const LocalNode& node)
-    {
-        writer->node(NodeInfo(
-            NodeType(node.type),
-            (std::string) node.display_name,
-            vpaths.virtual_path_of(node.selector),
-            settings.host_name,
-            settings.listen_port
-        ));
+        return out;
     }
 
 }

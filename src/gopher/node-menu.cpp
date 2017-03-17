@@ -34,7 +34,7 @@ namespace spg::gopher
 
     std::unique_ptr<gopher::proto::Writer> NodeMenu::make_writer(
             const WriteParams& wp,
-            const request::Request& request)
+            const request::Request& request) const
     {
         using spg::gopher::proto::MenuWriter;
 

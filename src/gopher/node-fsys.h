@@ -28,7 +28,7 @@ namespace spg::gopher
             virtual std::unique_ptr<Writer> make_writer(
                 const WriteParams& wp,
                 const request::Request& request
-            ) override;
+            ) const override;
 
         private:
             const settings::Settings& settings;
@@ -44,17 +44,17 @@ namespace spg::gopher
             };
 
             NodeType type_of(const std::string& requested_sub);
-            RequestData analyze_request(const request::Request& request);
+            RequestData analyze_request(const request::Request& request) const;
 
             std::unique_ptr<Writer> list_dir(
                 const WriteParams& wp,
                 const RequestData& paths
-            );
+            ) const;
 
             static bool hidden(const char* name);
             static const char* next_entry(DIR* dir);
 
-            std::unique_ptr<Writer> send_file(
+            static std::unique_ptr<Writer> send_file(
                 const WriteParams& wp,
                 const RequestData& paths
             );

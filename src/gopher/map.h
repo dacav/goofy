@@ -41,7 +41,7 @@ namespace spg::gopher
             }
 
             // User lookup, may throw LookupFailure
-            Node& lookup(const std::string& selector) const;
+            const Node& lookup(const std::string& selector) const;
 
         private:
             const settings::Settings& settings;

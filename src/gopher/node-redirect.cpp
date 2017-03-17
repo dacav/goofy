@@ -3,24 +3,21 @@
 namespace spg::gopher
 {
 
-    NodeRedirect::NodeRedirect(
-            const settings::Settings& sets,
-            const std::string& h) :
+    NodeRedirect::NodeRedirect(const settings::Settings& sets) :
         Node(
             NodeType::NT_HYPERTEXT,
-            h.c_str() + 4,  // 4 = length("URL:")
-            h,
+            "URL resolver",
+            "URL:",
             sets.host_name,
             sets.listen_port
         ),
-        settings(sets),
-        href(h)
+        settings(sets)
     {
     }
 
     std::unique_ptr<proto::Writer> NodeRedirect::make_writer(
             const WriteParams& wp,
-            const request::Request& req)
+            const request::Request& req) const
     {
         proto::BytesWriter* writer = new proto::BytesWriter(wp);
         std::unique_ptr<Writer> out(writer);

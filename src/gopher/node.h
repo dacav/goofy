@@ -32,7 +32,7 @@ namespace spg::gopher
             virtual std::unique_ptr<Writer> make_writer(
                 const WriteParams& wp,
                 const request::Request& request
-            ) = 0;
+            ) const = 0;
     };
 
 }
