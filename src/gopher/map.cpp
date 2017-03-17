@@ -5,7 +5,8 @@
 namespace spg::gopher
 {
     LookupMap::LookupMap(const settings::Settings& sets) :
-        settings(sets)
+        settings(sets),
+        url_redirector(settings)
     {
     }
 
@@ -26,6 +27,10 @@ namespace spg::gopher
 
     Node& LookupMap::lookup(const std::string& selector) const
     {
+        if (selector.find("URL:") == 0) {
+            return url_redirector;
+        }
+
         auto ptr = nodes.find(selector);
         if (ptr == nodes.end()) {
             throw LookupFailure(selector);

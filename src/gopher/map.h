@@ -7,6 +7,7 @@
 #include <cstddef>
 
 #include "node.h"
+#include "node-redirect.h"
 #include "../error.h"
 #include "../settings.h"
 
@@ -44,6 +45,7 @@ namespace spg::gopher
 
         private:
             const settings::Settings& settings;
+            const NodeRedirect url_redirector;
 
             // maps selectors to nodes, used for lookups, populated by
             // mknode.

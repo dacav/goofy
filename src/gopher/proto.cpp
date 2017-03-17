@@ -165,10 +165,6 @@ namespace spg::gopher::proto
         schedule();
     }
 
-    void Writer::before_write()
-    {
-    }
-
     void Writer::cb_write(int sock, short what, void *arg)
     {
         Writer& writer = *reinterpret_cast<Writer*>(arg);
@@ -189,6 +185,10 @@ namespace spg::gopher::proto
         }
     }
 
+    void Writer::before_write()
+    {
+    }
+
     // TODO: rename as 'next_event' or 'wait_ready' or so...
     void Writer::schedule()
     {
@@ -203,9 +203,54 @@ namespace spg::gopher::proto
         ev_write.reset();
     }
 
-    MenuWriter::MenuWriter(const WriteParams& params) :
+    BytesWriter::BytesWriter(const WriteParams& params) :
         Writer(params),
         cursor(0)
+    {
+    }
+
+    void BytesWriter::append(const char* bytes, size_t len)
+    {
+        buffer.insert(buffer.end(), bytes, bytes + len);
+    }
+
+    void BytesWriter::append(const std::string& string)
+    {
+        buffer.insert(buffer.end(), string.begin(), string.end());
+    }
+
+    void BytesWriter::append(const char& byte)
+    {
+        buffer.push_back(byte);
+    }
+
+    void BytesWriter::write_chunk(int sock)
+    {
+        size_t sent = spg::gopher::proto::write(sock,
+            &buffer[cursor], buffer.size() - cursor
+        );
+
+        if (sent == 0) {
+            throw IOError("wrote 0 bytes");
+        }
+
+        cursor += sent;
+        if (cursor < buffer.size()) {
+            schedule();
+        }
+        else {
+            assert(cursor == buffer.size()); // never >
+            write_params.got_success();
+        }
+    }
+
+    void BytesWriter::before_write()
+    {
+        buffer.shrink_to_fit();
+    }
+
+    MenuWriter::MenuWriter(const WriteParams& params) :
+        BytesWriter(params)
     {
     }
 
@@ -251,46 +296,9 @@ namespace spg::gopher::proto
 
     void MenuWriter::before_write()
     {
-        Writer::before_write();
-
         const char line[] = ".\r\n";
         append(line, sizeof(line) - 1);
-        buffer.shrink_to_fit();
-    }
-
-    void MenuWriter::append(const char* bytes, size_t len)
-    {
-        buffer.insert(buffer.end(), bytes, bytes + len);
-    }
-
-    void MenuWriter::append(const std::string& string)
-    {
-        buffer.insert(buffer.end(), string.begin(), string.end());
-    }
-
-    void MenuWriter::append(const char& byte)
-    {
-        buffer.push_back(byte);
-    }
-
-    void MenuWriter::write_chunk(int sock)
-    {
-        size_t sent = spg::gopher::proto::write(sock,
-            &buffer[cursor], buffer.size() - cursor
-        );
-
-        if (sent == 0) {
-            throw IOError("wrote 0 bytes");
-        }
-
-        cursor += sent;
-        if (cursor < buffer.size()) {
-            schedule();
-        }
-        else {
-            assert(cursor == buffer.size()); // never >
-            write_params.got_success();
-        }
+        BytesWriter::before_write();
     }
 
     FileWriter::FileWriter(

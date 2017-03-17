@@ -146,7 +146,26 @@ namespace spg::gopher::proto
             static void cb_write(int sock, short what, void *arg);
     };
 
-    class MenuWriter : public Writer
+    class BytesWriter : public Writer
+    {
+        public:
+            BytesWriter(const WriteParams& params);
+
+            void append(const char* bytes, size_t len);
+            void append(const std::string& string);
+            void append(const char& byte);
+
+        protected:
+            virtual void before_write();
+
+        private:
+            std::vector<char> buffer;
+            unsigned cursor;
+            virtual void write_chunk(int sock) override;
+
+    };
+
+    class MenuWriter : public BytesWriter
     {
         public:
             MenuWriter(const WriteParams& params);
@@ -162,15 +181,7 @@ namespace spg::gopher::proto
             virtual void before_write() override;
 
         protected:
-            inline void append(const char* bytes, size_t len);
-            inline void append(const std::string& string);
-            inline void append(const char& byte);
-
-        private:
-            std::vector<char> buffer;
-            unsigned cursor;
-
-            virtual void write_chunk(int sock) override;
+            // TODO: set all append methods as protected.
     };
 
     class FileWriter : public Writer
