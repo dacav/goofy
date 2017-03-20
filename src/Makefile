@@ -6,7 +6,7 @@ LDFLAGS += -lmagic
 
 DIRS := $(shell find . -type d)
 FILES := $(foreach dir, $(DIRS), $(wildcard $(dir)/*.c) \
-		                         $(wildcard $(dir)/*.cpp))
+		                         $(wildcard $(dir)/*.cc))
 OBJS := $(addsuffix .o, $(basename $(FILES)))
 
 # smoky pocket gopher
@@ -18,7 +18,7 @@ all: $(OBJS)
 clean:
 	rm -f $(OBJS) $(APP) $(OBJS:.o=.d)
 
-%.d: %.cpp
+%.d: %.cc
 	$(CXX) $(CXXFLAGS) -MM -MF $@ $<
 
 -include $(OBJS:.o=.d)
