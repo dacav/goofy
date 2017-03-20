@@ -53,7 +53,7 @@ namespace spg::session
 
     bool Session::got_line(const char *line, size_t len)
     {
-        gopher::request::Request request(line, len);
+        const gopher::request::Request request(line, len);
 
         gopher::proto::WriteParams params = {
             .ev_base = read_params.ev_base,
