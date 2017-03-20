@@ -28,7 +28,7 @@ namespace spg::gopher
 #define SERVER "spg"
 #define VERSION "0.0"
 
-        const char* text = (
+        std::string text = (
             "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n"
             "<html>\n"
             "<head>\n"
@@ -53,14 +53,15 @@ namespace spg::gopher
             "</html>\n"
         );
 
-        writer->append(
-            regex_replace(
-                text,
-                std::regex("\\$\\{URL\\}"),
-                req.selector
-            )
-        );
+        constexpr const char* keyword = "${URL}";
+        constexpr size_t len = strlen(keyword);
 
+        auto next = text.find("${URL}");
+        while (next != text.npos) {
+            text.replace(next, len, req.url());
+            next = text.find("${URL}");
+        }
+        writer->append(text);
         return out;
     }
 
