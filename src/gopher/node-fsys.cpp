@@ -9,44 +9,6 @@
 #include "proto.h"
 #include "error.h"
 
-namespace
-{
-    std::string requested_path(const spg::gopher::request::Request& request)
-    {
-        auto cursor = request.query.cbegin();
-        cursor ++; // skip selector
-
-        size_t len = 0;
-        while (cursor != request.query.cend()) {
-            len += 1 + cursor->length();
-            cursor ++;
-        }
-
-        std::string out;
-        if (len == 0) {
-            return out;
-        }
-
-        cursor = request.query.cbegin();
-        cursor ++; // skip selector
-
-        out.reserve(len);
-        while (cursor != request.query.cend()) {
-            const std::string& step = *cursor;
-
-            out += step;
-            if (step == ".." || step == ".") {
-                throw spg::LookupFailure(out);
-            }
-            out += '/';
-            cursor ++;
-        }
-        out.pop_back();
-
-        return out;
-    }
-}
-
 namespace spg::gopher
 {
     NodeFSys::NodeFSys(
@@ -73,7 +35,7 @@ namespace spg::gopher
 
     NodeFSys::RequestData NodeFSys::analyze_request(const request::Request& request) const
     {
-        std::string reqpath = requested_path(request);
+        std::string reqpath = request.as_path();
 
         std::string fsys_path(root_path);
         std::string selector_path(info.selector);

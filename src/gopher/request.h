@@ -2,7 +2,9 @@
 
 #include <cstddef>
 #include <string>
-#include <vector>
+#include <list>
+
+#include "../util/str.h"
 
 namespace spg::gopher::request
 {
@@ -11,8 +13,17 @@ namespace spg::gopher::request
         public:
             Request(const char* selector, size_t len);
 
-            const std::vector<std::string> query;
-            const std::string& selector;
+            std::string selector() const;
+            std::list<util::StrRef> query() const;
+            std::string as_path() const;
+            std::string url() const;
+
+            const std::string raw_body;
+            const bool is_url;
+
+        private:
+            const char separator;
+            const size_t first;
     };
 
 }

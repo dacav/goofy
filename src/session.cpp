@@ -64,7 +64,7 @@ namespace spg::session
         };
 
         try {
-            writer = gopher_map.lookup_map.lookup(request.selector)
+            writer = gopher_map.lookup_map.lookup(request.selector())
                                           .make_writer(params, request);
         }
         catch (spg::LookupFailure& e) {

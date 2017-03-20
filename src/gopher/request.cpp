@@ -1,44 +1,64 @@
 #include "request.h"
+#include "../error.h"
 
-#include <cstring>
-
-namespace
-{
-    const std::string ROOT_SELECTOR("");
-
-    std::vector<std::string> split_path(const char* begin, size_t len)
-    {
-        std::vector<std::string> out;
-
-        while (len > 0) {
-            const char* end = (const char*) memchr(begin, '/', len);
-
-            if (end == nullptr) {
-                out.emplace_back(begin, len);
-                out.back().shrink_to_fit();
-                len = 0;
-            }
-            else {
-                const size_t step_len = end - begin;
-                if (step_len > 0) {
-                    out.emplace_back(begin, step_len);
-                    out.back().shrink_to_fit();
-                }
-
-                len -= step_len + 1;
-                begin += step_len + 1;
-            }
-        }
-        out.shrink_to_fit();
-        return out;
-    }
-}
+#include <cassert>
 
 namespace spg::gopher::request
 {
     Request::Request(const char* line, size_t len) :
-        query(split_path(line, len)),
-        selector(query.size() > 0 ? query.front() : ROOT_SELECTOR)
+        raw_body(line, len),
+        is_url(raw_body.find("URL:") == 0),
+        separator(is_url ? ':' : '/'),
+        first(
+            is_url
+            ? strlen("URL:")
+            : raw_body.find_first_not_of(separator)
+        )
     {
+        assert(raw_body.length() > 0 || first == raw_body.npos);
+    }
+
+    std::string Request::selector() const
+    {
+        if (first == raw_body.npos) return "";
+        if (is_url) return "URL:";
+        return raw_body.substr(
+            first,
+            raw_body.find_first_of(separator, first) - first
+        );
+    }
+
+    std::string Request::url() const
+    {
+        if (!is_url) return "";
+        return raw_body.substr(first);
+    }
+
+    std::list<util::StrRef> Request::query() const
+    {
+        if (is_url) return {};
+        auto tokens = util::tokenize(raw_body, separator);
+        tokens.pop_front();
+        return tokens;
+    }
+
+    std::string Request::as_path() const
+    {
+        if (is_url) return "";
+
+        std::string out;
+        out.reserve(raw_body.length());
+        for (std::string tok : query()) {
+            if (tok.length() == 0) continue;
+            if (tok == ".." || tok == ".") {
+                // note, '/' is the separator.
+                throw BadRequest(raw_body, "invalid path");
+            }
+            out += tok;
+            out += '/';
+        }
+        out.pop_back(); // drop trailing slash.
+
+        return out;
     }
 }
