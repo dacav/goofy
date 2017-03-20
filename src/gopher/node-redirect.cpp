@@ -57,7 +57,7 @@ namespace spg::gopher
             regex_replace(
                 text,
                 std::regex("\\$\\{URL\\}"),
-                req.selector()
+                req.selector
             )
         );
 
