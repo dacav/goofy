@@ -64,8 +64,9 @@ namespace spg::session
         };
 
         try {
-            writer = gopher_map.lookup_map.lookup(request.selector())
-                                          .make_writer(params, request);
+            writer = gopher_map.lookup_map
+                .lookup(request)
+                .make_writer(params, request);
         }
         catch (spg::LookupFailure& e) {
             auto menu = new spg::gopher::proto::MenuWriter(params);

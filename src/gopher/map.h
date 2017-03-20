@@ -8,6 +8,7 @@
 
 #include "node.h"
 #include "node-redirect.h"
+#include "request.h"
 #include "../error.h"
 #include "../settings.h"
 
@@ -41,7 +42,7 @@ namespace spg::gopher
             }
 
             // User lookup, may throw LookupFailure
-            const Node& lookup(const std::string& selector) const;
+            const Node& lookup(const request::Request& request) const;
 
         private:
             const settings::Settings& settings;

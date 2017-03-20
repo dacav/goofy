@@ -25,12 +25,12 @@ namespace spg::gopher
         }
     }
 
-    const Node& LookupMap::lookup(const std::string& selector) const
+    const Node& LookupMap::lookup(const request::Request& request) const
     {
-        if (selector.find("URL:") == 0) {
-            return url_redirector;
-        }
+        // probably URL: sucks, avoid stringly typed
+        if (request.is_url) return url_redirector;
 
+        const std::string selector = request.selector();
         auto ptr = nodes.find(selector);
         if (ptr == nodes.end()) {
             throw LookupFailure(selector);
