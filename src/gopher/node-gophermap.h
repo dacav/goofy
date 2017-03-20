@@ -10,7 +10,7 @@
 #include "../settings.h"
 #include "../map_parser.h"
 
-namespace spg::gopher
+namespace goofy::gopher
 {
     class NodeGopherMap : public Node
     {

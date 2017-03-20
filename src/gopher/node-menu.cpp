@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace spg::gopher
+namespace goofy::gopher
 {
     NodeMenu::NodeMenu(
             const settings::Settings &sets,
@@ -36,7 +36,7 @@ namespace spg::gopher
             const WriteParams& wp,
             const request::Request& request) const
     {
-        using spg::gopher::proto::MenuWriter;
+        using goofy::gopher::proto::MenuWriter;
 
         auto writer = new MenuWriter(wp);
         std::unique_ptr<Writer> out(writer);

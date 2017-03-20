@@ -18,7 +18,7 @@ namespace
         );
         switch (inet_pton(AF_INET, addr, &in4.sin_addr)) {
             case -1:
-                throw spg::Error("inet_pton(AF_INET, ...)", errno);
+                throw goofy::Error("inet_pton(AF_INET, ...)", errno);
             case 0:
                 return nullptr;
             case 1:
@@ -43,7 +43,7 @@ namespace
         );
         switch (inet_pton(AF_INET6, addr, &in6.sin6_addr)) {
             case -1:
-                throw spg::Error("inet_pton(AF_INET6, ...)", errno);
+                throw goofy::Error("inet_pton(AF_INET6, ...)", errno);
             case 0:
                 return nullptr;
             case 1:
@@ -57,7 +57,7 @@ namespace
 
 } // anon namespace
 
-namespace spg::settings
+namespace goofy::settings
 {
 
     struct sockaddr_storage mkaddr(const char* address, uint16_t port)
@@ -65,7 +65,7 @@ namespace spg::settings
         struct sockaddr_storage storage;
         if (parse4(storage, address, port) == nullptr
                 && parse6(storage, address, port) == nullptr) {
-            throw spg::Error(std::string("Cannot parse address: ") + address);
+            throw goofy::Error(std::string("Cannot parse address: ") + address);
         }
         return storage;
     }

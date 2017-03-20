@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-namespace spg::util
+namespace goofy::util
 {
     StrRef::StrRef() :
         StrRef(nullptr, 0)

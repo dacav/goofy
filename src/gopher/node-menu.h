@@ -8,7 +8,7 @@
 #include "node.h"
 #include "../settings.h"
 
-namespace spg::gopher
+namespace goofy::gopher
 {
     class NodeMenu : public Node
     {

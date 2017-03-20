@@ -1,7 +1,7 @@
 #include "fileread.h"
 #include "../error.h"
 
-namespace spg::util
+namespace goofy::util
 {
 
     Reader::~Reader()

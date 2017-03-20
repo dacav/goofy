@@ -4,7 +4,7 @@
 #include <utility>
 #include <string>
 
-namespace spg::util
+namespace goofy::util
 {
     struct StrRef
     {

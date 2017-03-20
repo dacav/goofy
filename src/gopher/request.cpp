@@ -3,7 +3,7 @@
 
 #include <cassert>
 
-namespace spg::gopher::request
+namespace goofy::gopher::request
 {
     Request::Request(const char* line, size_t len) :
         raw_body(line, len),

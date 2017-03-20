@@ -11,7 +11,7 @@
 #include "proto.h"
 #include "../settings.h"
 
-namespace spg::gopher
+namespace goofy::gopher
 {
 
     class NodeFSys : public Node

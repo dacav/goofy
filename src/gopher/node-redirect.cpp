@@ -2,7 +2,7 @@
 
 #include <regex>
 
-namespace spg::gopher
+namespace goofy::gopher
 {
 
     NodeRedirect::NodeRedirect(const settings::Settings& sets) :
@@ -25,7 +25,7 @@ namespace spg::gopher
         std::unique_ptr<Writer> out(writer);
 
         // TODO: have these in a conf.h with autotools
-#define SERVER "spg"
+#define SERVER "goofy"
 #define VERSION "0.0"
 
         std::string text = (

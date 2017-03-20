@@ -5,7 +5,7 @@
 
 #include "../util/typeguesser.h"
 
-namespace spg::gopher
+namespace goofy::gopher
 {
     enum NodeType {
         NT_PLAIN = '0',

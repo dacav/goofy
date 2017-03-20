@@ -14,7 +14,7 @@
 #include "util/fileread.h"
 #include "util/str.h"
 
-namespace spg::map_parser
+namespace goofy::map_parser
 {
     class Parser
     {
@@ -22,29 +22,29 @@ namespace spg::map_parser
             struct LocalNode
             {
                 char type;
-                spg::util::StrRef display_name;
-                spg::util::StrRef selector;
+                goofy::util::StrRef display_name;
+                goofy::util::StrRef selector;
             };
             using GotLocalNodeCallback = std::function<void(const LocalNode&)>;
 
             struct RemoteNode
             {
                 char type;
-                spg::util::StrRef display_name;
-                spg::util::StrRef selector;
-                spg::util::StrRef hostname;
+                goofy::util::StrRef display_name;
+                goofy::util::StrRef selector;
+                goofy::util::StrRef hostname;
                 uint16_t port;
             };
             using GotRemoteNodeCallback = std::function<void(const RemoteNode&)>;
 
             struct Url
             {
-                spg::util::StrRef display_name;
-                spg::util::StrRef href;
+                goofy::util::StrRef display_name;
+                goofy::util::StrRef href;
             };
             using GotUrlCallback = std::function<void(const Url&)>;
 
-            using GotTextCallback = std::function<void(const spg::util::StrRef&)>;
+            using GotTextCallback = std::function<void(const goofy::util::StrRef&)>;
 
             Parser(
                 const settings::Settings& settings,

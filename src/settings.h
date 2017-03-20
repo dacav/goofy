@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-namespace spg::settings
+namespace goofy::settings
 {
     struct Settings
     {

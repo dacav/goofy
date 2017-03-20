@@ -9,12 +9,12 @@
 
 #include <iostream>
 
-namespace spg::session
+namespace goofy::session
 {
 
     Session::Session(
-            const spg::settings::Settings& sets,
-            spg::gopher::Map& map,
+            const goofy::settings::Settings& sets,
+            goofy::gopher::Map& map,
             const DropCallback& drop_cb,
             int sock,
             struct event_base *ev_base) :
@@ -68,14 +68,14 @@ namespace spg::session
                 .lookup(request)
                 .make_writer(params, request);
         }
-        catch (spg::LookupFailure& e) {
-            auto menu = new spg::gopher::proto::MenuWriter(params);
+        catch (goofy::LookupFailure& e) {
+            auto menu = new goofy::gopher::proto::MenuWriter(params);
             writer.reset(menu);
             menu->error("Lookup failure");
             menu->text(e.what());
         }
-        catch (spg::NodeFailure& e) {
-            auto menu = new spg::gopher::proto::MenuWriter(params);
+        catch (goofy::NodeFailure& e) {
+            auto menu = new goofy::gopher::proto::MenuWriter(params);
             writer.reset(menu);
             menu->error("Node failure");
             menu->text(e.what());

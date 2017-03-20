@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace spg::util
+namespace goofy::util
 {
     mode_t mode_of(const std::string& fsys_path);
     mode_t mode_of(const char* fsys_path);

@@ -12,12 +12,12 @@
 #include "../error.h"
 #include "../settings.h"
 
-namespace spg::gopher
+namespace goofy::gopher
 {
-    class MapError : public spg::Error {
+    class MapError : public goofy::Error {
         public:
             MapError(const std::string msg)
-                : spg::Error(msg) {}
+                : goofy::Error(msg) {}
     };
 
     class DuplicatedError : public MapError {

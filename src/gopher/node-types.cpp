@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-namespace spg::gopher
+namespace goofy::gopher
 {
 
     NodeInfo::NodeInfo(

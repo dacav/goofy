@@ -6,7 +6,7 @@
 
 #include "str.h"
 
-namespace spg::util
+namespace goofy::util
 {
 
     // Simple RAII wrapper around cstdio's file descriptors.

@@ -5,7 +5,7 @@
 #include <cstring>
 #include <cerrno>
 
-namespace spg
+namespace goofy
 {
     class Error : public std::runtime_error
     {

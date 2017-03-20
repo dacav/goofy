@@ -6,7 +6,7 @@
 
 #include "../util/str.h"
 
-namespace spg::gopher::request
+namespace goofy::gopher::request
 {
     class Request
     {

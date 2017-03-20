@@ -5,7 +5,7 @@
 #include <array>
 using namespace std::placeholders;
 
-namespace spg::gopher
+namespace goofy::gopher
 {
 
     NodeGopherMap::NodeGopherMap(
@@ -33,7 +33,7 @@ namespace spg::gopher
         proto::MenuWriter* writer = new proto::MenuWriter(wp);
         std::unique_ptr<proto::Writer> out(writer);
 
-        spg::util::Reader file_reader;
+        goofy::util::Reader file_reader;
 
         const map_parser::Parser map_parser(
             settings,

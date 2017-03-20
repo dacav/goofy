@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-namespace spg::gopher::proto
+namespace goofy::gopher::proto
 {
     size_t read(int fd, void* buffer, size_t len)
     {
@@ -98,7 +98,7 @@ namespace spg::gopher::proto
         const size_t room = buffer.size() - cursor;
         char* start = &buffer[cursor];
 
-        size_t size = spg::gopher::proto::read(sock, start, room);
+        size_t size = goofy::gopher::proto::read(sock, start, room);
 
         if (size == 0) {
             end();
@@ -226,7 +226,7 @@ namespace spg::gopher::proto
 
     void BytesWriter::write_chunk(int sock)
     {
-        size_t sent = spg::gopher::proto::write(sock,
+        size_t sent = goofy::gopher::proto::write(sock,
             &buffer[cursor], buffer.size() - cursor
         );
 

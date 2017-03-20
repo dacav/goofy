@@ -18,7 +18,7 @@
 #include <event2/event.h>
 #include <sys/sendfile.h>
 
-namespace spg::gopher::proto
+namespace goofy::gopher::proto
 {
     /* Minimal wrapper for unix's read: reads at most len bytes into buffer,
      * returns the actual amount of bytes read, throws IOError in case of error.
@@ -31,7 +31,7 @@ namespace spg::gopher::proto
      */
     size_t write(int fd, const void* buffer, size_t len);
 
-    /* The same as spg::gopher::proto::write, but uses a MSG_DONTWAIT flag
+    /* The same as goofy::gopher::proto::write, but uses a MSG_DONTWAIT flag
      * in order to have a non-blocking send.
      *
      * The EWOULDBLOCK condition triggers an IOError exception as any other
@@ -107,7 +107,7 @@ namespace spg::gopher::proto
             const ReadParams read_params;
             std::vector<char> buffer;
             size_t cursor;
-            spg::gopher::proto::Event ev_read;
+            goofy::gopher::proto::Event ev_read;
 
             static void cb_read(int sock, short what, void *arg);
             void schedule();
@@ -140,7 +140,7 @@ namespace spg::gopher::proto
             const WriteParams write_params;
 
         private:
-            spg::gopher::proto::Event ev_write;
+            goofy::gopher::proto::Event ev_write;
             virtual void end();
 
             static void cb_write(int sock, short what, void *arg);

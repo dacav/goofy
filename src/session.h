@@ -12,16 +12,16 @@
 #include "settings.h"
 #include "error.h"
 
-namespace spg::session
+namespace goofy::session
 {
-    class SessionError : public spg::Error
+    class SessionError : public goofy::Error
     {
         public:
             SessionError(const std::string &msg)
-                : spg::Error(msg)
+                : goofy::Error(msg)
             {}
             SessionError(const std::string &when, int e)
-                : spg::Error(when, e)
+                : goofy::Error(when, e)
             {}
     };
 
@@ -31,8 +31,8 @@ namespace spg::session
             using DropCallback = std::function<void()>;
 
             Session(
-                const spg::settings::Settings& settings,
-                spg::gopher::Map& gopher_map,
+                const goofy::settings::Settings& settings,
+                goofy::gopher::Map& gopher_map,
                 const DropCallback& drop_callback,
                 int clsock,
                 struct event_base*
@@ -45,7 +45,7 @@ namespace spg::session
             void operator=(Session&&) = delete;
 
         private:
-            const spg::settings::Settings& settings;
+            const goofy::settings::Settings& settings;
             gopher::Map& gopher_map;
             DropCallback drop_callback;
 

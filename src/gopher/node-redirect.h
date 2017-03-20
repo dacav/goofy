@@ -3,7 +3,7 @@
 #include "node.h"
 #include "../settings.h"
 
-namespace spg::gopher
+namespace goofy::gopher
 {
     class NodeRedirect : public Node
     {

@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace spg::gopher
+namespace goofy::gopher
 {
     LookupMap::LookupMap(const settings::Settings& sets) :
         settings(sets),

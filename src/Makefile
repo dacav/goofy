@@ -10,7 +10,7 @@ FILES := $(foreach dir, $(DIRS), $(wildcard $(dir)/*.c) \
 OBJS := $(addsuffix .o, $(basename $(FILES)))
 
 # smoky pocket gopher
-APP := spg
+APP := goofy
 
 all: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) -o $(APP)

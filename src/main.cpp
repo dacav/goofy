@@ -26,10 +26,10 @@ namespace
 {
     struct Server
     {
-        Server(const spg::settings::Settings& settings);
+        Server(const goofy::settings::Settings& settings);
 
-        const spg::settings::Settings& settings;
-        spg::gopher::Map gopher_map;
+        const goofy::settings::Settings& settings;
+        goofy::gopher::Map gopher_map;
 
         std::unique_ptr<
             struct event_base,
@@ -48,13 +48,13 @@ namespace
 
         std::unordered_map<
             unsigned,
-            std::unique_ptr<spg::session::Session>
+            std::unique_ptr<goofy::session::Session>
         > sessions;
 
-        spg::gopher::GopherTypeGuesser type_guesser;
+        goofy::gopher::GopherTypeGuesser type_guesser;
 
         void drop_session(unsigned session_id);
-        spg::session::Session& new_session(int clsock);
+        goofy::session::Session& new_session(int clsock);
         void start();
 
         static void cb_accept(
@@ -72,7 +72,7 @@ namespace
                 void *ctx);
     };
 
-    Server::Server(const spg::settings::Settings& sets) :
+    Server::Server(const goofy::settings::Settings& sets) :
         settings(sets),
         gopher_map(settings),
         base_event(event_base_new(), event_base_free),
@@ -107,13 +107,13 @@ namespace
         sessions.erase(session_id);
     }
 
-    spg::session::Session& Server::new_session(int clsock)
+    goofy::session::Session& Server::new_session(int clsock)
     {
         using namespace std::placeholders;
 
         assert(clsock != -1);
-        std::unique_ptr<spg::session::Session> session(
-            new spg::session::Session(
+        std::unique_ptr<goofy::session::Session> session(
+            new goofy::session::Session(
                 settings,
                 gopher_map,
                 std::bind(&Server::drop_session, this, clsock),
@@ -136,7 +136,7 @@ namespace
         try {
             reinterpret_cast<Server*>(context)->new_session(clsocket);
         }
-        catch (spg::session::SessionError& error) {
+        catch (goofy::session::SessionError& error) {
             std::cerr << "Creating session: "
                 << error.what() << std::endl;
         }
@@ -185,16 +185,16 @@ namespace
 
 int main(int argc, char **argv)
 {
-    spg::settings::Settings settings;
+    goofy::settings::Settings settings;
     settings.listen_port = 7070;
-    settings.bind_addr = spg::settings::mkaddr("::1", settings.listen_port);
+    settings.bind_addr = goofy::settings::mkaddr("::1", settings.listen_port);
     settings.accept_backlog = 10;
     settings.sock_reusable = true;
     settings.host_name = "localhost";
 
     Server srv(settings);
 
-    spg::map_parser::Loader(
+    goofy::map_parser::Loader(
         settings,
         srv.gopher_map,
         srv.type_guesser,

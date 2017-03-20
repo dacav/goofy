@@ -8,12 +8,12 @@
 
 #include "../error.h"
 
-namespace spg::gopher
+namespace goofy::gopher
 {
 
-    class NodeError : public spg::Error {
+    class NodeError : public goofy::Error {
         public:
-            NodeError(const std::string msg) : spg::Error(msg) {}
+            NodeError(const std::string msg) : goofy::Error(msg) {}
     };
 
     class Node {
@@ -27,8 +27,8 @@ namespace spg::gopher
 
             const NodeInfo info;
 
-            using WriteParams = spg::gopher::proto::WriteParams;
-            using Writer = spg::gopher::proto::Writer;
+            using WriteParams = goofy::gopher::proto::WriteParams;
+            using Writer = goofy::gopher::proto::Writer;
             virtual std::unique_ptr<Writer> make_writer(
                 const WriteParams& wp,
                 const request::Request& request

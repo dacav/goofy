@@ -1,7 +1,7 @@
 #include "typeguesser.h"
 #include "../error.h"
 
-namespace spg::util
+namespace goofy::util
 {
     mode_t mode_of(const std::string& fsys_path)
     {

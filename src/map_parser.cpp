@@ -7,7 +7,7 @@
 
 #include <deque>
 
-namespace spg::map_parser
+namespace goofy::map_parser
 {
     Parser::Parser(
             const settings::Settings& sets,

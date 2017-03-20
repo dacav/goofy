@@ -1,7 +1,7 @@
 #include "node.h"
 #include "proto.h"
 
-namespace spg::gopher
+namespace goofy::gopher
 {
 
     Node::Node(NodeType type,

@@ -9,7 +9,7 @@
 #include "proto.h"
 #include "error.h"
 
-namespace spg::gopher
+namespace goofy::gopher
 {
     NodeFSys::NodeFSys(
             const settings::Settings& sets,
