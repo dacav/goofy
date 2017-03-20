@@ -32,12 +32,13 @@ namespace spg::map_parser
             return;
         }
         if (tokens.size() > 4) {
+            // TODO: probably log
             if (on_text) on_text(line);
             return;
         }
 
         auto display_name = tokens.front();
-        if (!display_name || display_name.len < 2) {
+        if (display_name.empty() || display_name.len < 2) {
             // invalid display_name: too short. Must be at least two char.
             // TODO: Probably we want to log this.
             if (on_text) on_text(line);
@@ -68,7 +69,7 @@ namespace spg::map_parser
         bool local = true;
         util::StrRef hostname;
         if (tokens.size() > 0) {
-            if (tokens.front()) {
+            if (!tokens.front().empty()) {
                 hostname = tokens.front();
                 local = false;
             }
@@ -155,11 +156,11 @@ namespace spg::map_parser
                     add_gopherfile((info));
                     break;
                 case S_IFDIR:
-                    add_filesystem(std::move(info));
+                    add_filesystem(info);
                     break;
                 default:
                     throw ConfigError(
-                        info.selector
+                        std::string(info.selector)
                         + ": Unsupported file type. stat.st_mode : "
                         + std::to_string(mode)
                     );

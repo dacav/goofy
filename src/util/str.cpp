@@ -34,9 +34,9 @@ namespace spg::util
         return std::string(start, len);
     }
 
-    StrRef::operator bool() const
+    bool StrRef::empty() const
     {
-        return start != nullptr;
+        return start == nullptr;
     }
 
     StrRef& StrRef::operator++(int)

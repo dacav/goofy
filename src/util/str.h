@@ -20,9 +20,9 @@ namespace spg::util
 
         const char* start;
         size_t len;
+        bool empty() const;
 
         operator std::string() const;
-        operator bool() const;
     };
 
     std::list<StrRef> tokenize(const StrRef&, char sep);
