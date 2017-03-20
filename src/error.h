@@ -73,4 +73,11 @@ namespace spg
                 UserError(sel + ": " + reason) {}
     };
 
+    class BadRequest : public UserError
+    {
+        public:
+            BadRequest(const std::string& sel, const char* reason) :
+                UserError(sel + ": " + reason) {}
+    };
+
 }
