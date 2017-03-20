@@ -50,14 +50,14 @@ namespace spg::gopher::request
         out.reserve(raw_body.length());
         for (std::string tok : query()) {
             if (tok.length() == 0) continue;
-            if (tok == ".." || tok == ".") {
+            if (tok == ".." || tok == ".") { // TODO: this can be optimized
                 // note, '/' is the separator.
                 throw BadRequest(raw_body, "invalid path");
             }
             out += tok;
             out += '/';
         }
-        out.pop_back(); // drop trailing slash.
+        if (!out.empty()) out.pop_back(); // drop trailing slash.
 
         return out;
     }
