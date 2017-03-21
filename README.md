@@ -16,11 +16,14 @@ Comments, suggestions and patches are welcome.
 
 ## Compilation
 
-Goofy is not using a serious build system, yet. The build is based ona
-simple general purpose makefile. In order to use it, just run `make` in the
-`src` directory.
+I'm using GNU Autotools.
 
-I plan to use GNU Autotools or CMake for this purpose.
+1. Run `reconfig.sh` if you cloned the git repository, since I'm not
+checking in the byproducts of the build system.
+
+2. `./configure && make`
+
+3. Enjoy your `src/goofy` executable.
 
 ## Dependencies
 
