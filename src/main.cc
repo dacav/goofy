@@ -85,7 +85,7 @@ namespace
             this,
             LEV_OPT_CLOSE_ON_FREE
                 | unsigned(settings.sock_reusable) * LEV_OPT_REUSEABLE,
-            settings.accept_backlog,
+            settings.listen_backlog,
             reinterpret_cast<const sockaddr *>(&settings.bind_addr),
             sizeof(settings.bind_addr)
         ));
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
     goofy::settings::Settings settings;
     settings.listen_port = 7070;
     settings.bind_addr = goofy::settings::mkaddr("::1", settings.listen_port);
-    settings.accept_backlog = 10;
+    settings.listen_backlog = 10;
     settings.sock_reusable = true;
     settings.host_name = "localhost";
 

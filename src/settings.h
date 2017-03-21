@@ -13,7 +13,7 @@ namespace goofy::settings
         sockaddr_storage bind_addr;
         uint16_t listen_port;
         std::string host_name;
-        unsigned accept_backlog;
+        unsigned listen_backlog;
         bool sock_reusable;
     };
 
