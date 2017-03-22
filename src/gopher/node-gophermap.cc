@@ -16,8 +16,8 @@ namespace goofy::gopher
             NodeType::NT_MENU,
             "display", // Good for a flat map of the gophersite?
             vps.virtual_path_of(path),
-            sets.host_name,
-            sets.tcp_port
+            sets.host_name.read(),
+            sets.tcp_port.read()
         ),
         settings(sets),
         vpaths(vps),
@@ -42,8 +42,8 @@ namespace goofy::gopher
                     NodeType(node.type),
                     (std::string) node.display_name,
                     vpaths.virtual_path_of(node.selector),
-                    settings.host_name,
-                    settings.tcp_port
+                    settings.host_name.read(),
+                    settings.tcp_port.read()
                 ));
             },
             [writer](const map_parser::Parser::RemoteNode& node) {
@@ -60,8 +60,8 @@ namespace goofy::gopher
                     NodeType::NT_HYPERTEXT,
                     (std::string) url.display_name,
                     (std::string) url.href,
-                    settings.host_name,
-                    settings.tcp_port
+                    settings.host_name.read(),
+                    settings.tcp_port.read()
                 ));
             },
             [writer](const util::StrRef& text) {

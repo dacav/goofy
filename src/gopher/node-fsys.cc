@@ -21,8 +21,8 @@ namespace goofy::gopher
             NodeType::NT_MENU,
             display_name,
             selector,
-            sets.host_name,
-            sets.tcp_port
+            sets.host_name.read(),
+            sets.tcp_port.read()
         ),
         settings(sets),
         type_guesser(tguess),

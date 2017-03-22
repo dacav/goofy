@@ -76,7 +76,7 @@ namespace goofy::map_parser
             tokens.pop_front();
         }
 
-        uint16_t port = local ? settings.tcp_port : 70;
+        uint16_t port = local ? settings.tcp_port.read() : 70;
         if (!tokens.empty()) {
             assert(tokens.size() == 1);
             try {

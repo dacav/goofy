@@ -13,7 +13,6 @@ namespace goofy::settings
     {
         Type value;
         const char* name;
-        static const size_t size = sizeof(Type);
 
         ConfItem(const char* n, Type v) :
             name(n),
@@ -21,7 +20,7 @@ namespace goofy::settings
         {
         }
 
-        operator const Type& () const
+        const Type& read() const
         {
             return value;
         }
