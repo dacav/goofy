@@ -22,7 +22,7 @@ namespace goofy::gopher
             display_name,
             selector,
             sets.host_name,
-            sets.listen_port
+            sets.tcp_port
         ),
         settings(sets),
         type_guesser(tguess),

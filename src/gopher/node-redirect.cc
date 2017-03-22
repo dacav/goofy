@@ -11,7 +11,7 @@ namespace goofy::gopher
             "URL resolver",
             "URL:",
             sets.host_name,
-            sets.listen_port
+            sets.tcp_port
         ),
         settings(sets)
     {

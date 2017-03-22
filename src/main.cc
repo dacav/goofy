@@ -79,6 +79,7 @@ namespace
         tcp_listener(nullptr, evconnlistener_free),
         sighandler(nullptr, event_free)
     {
+        errno = 0;
         tcp_listener.reset(evconnlistener_new_bind(
             base_event.get(),
             Server::cb_accept,
@@ -87,7 +88,7 @@ namespace
                 | unsigned(settings.sock_reusable) * LEV_OPT_REUSEABLE,
             settings.listen_backlog,
             reinterpret_cast<const sockaddr *>(&settings.bind_addr),
-            sizeof(settings.bind_addr)
+            settings.bind_addr.size
         ));
         if (tcp_listener.get() == nullptr) {
             std::cerr << "Cannot listen: " << strerror(errno) << std::endl;
@@ -185,23 +186,17 @@ namespace
 
 int main(int argc, char **argv)
 {
-    goofy::settings::Settings settings;
-    settings.listen_port = 7070;
-    settings.bind_addr = goofy::settings::mkaddr("::1", settings.listen_port);
-    settings.listen_backlog = 10;
-    settings.sock_reusable = true;
-    settings.host_name = "localhost";
-
-    Server srv(settings);
-
-    goofy::map_parser::Loader(
-        settings,
-        srv.gopher_map,
-        srv.type_guesser,
-        "root.gophermap"
-    );
-
     try {
+        goofy::settings::Settings settings;
+        Server srv(settings);
+
+        goofy::map_parser::Loader(
+            settings,
+            srv.gopher_map,
+            srv.type_guesser,
+            "root.gophermap"
+        );
+
         srv.start();
     }
     catch (int ret) {

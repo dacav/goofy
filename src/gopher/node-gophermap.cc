@@ -17,7 +17,7 @@ namespace goofy::gopher
             "display", // Good for a flat map of the gophersite?
             vps.virtual_path_of(path),
             sets.host_name,
-            sets.listen_port
+            sets.tcp_port
         ),
         settings(sets),
         vpaths(vps),
@@ -43,7 +43,7 @@ namespace goofy::gopher
                     (std::string) node.display_name,
                     vpaths.virtual_path_of(node.selector),
                     settings.host_name,
-                    settings.listen_port
+                    settings.tcp_port
                 ));
             },
             [writer](const map_parser::Parser::RemoteNode& node) {
@@ -61,7 +61,7 @@ namespace goofy::gopher
                     (std::string) url.display_name,
                     (std::string) url.href,
                     settings.host_name,
-                    settings.listen_port
+                    settings.tcp_port
                 ));
             },
             [writer](const util::StrRef& text) {
