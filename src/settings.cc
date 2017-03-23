@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "error.h"
+#include "settings.h"
 
 namespace
 {
@@ -59,6 +60,14 @@ namespace
 
 namespace goofy::settings
 {
+    Settings::Settings() :
+        tcp_port(confmap, "net.tcp_port", 7070),
+        bind_addr(confmap, "net.bind_addr", mkaddr("::1", tcp_port.read())),
+        host_name(confmap, "net.host_name", "localhost"),
+        listen_backlog(confmap, "net.listen_backlog", 10),
+        sock_reusable(confmap, "net.sock_reusable", true)
+    {
+    }
 
     struct sockaddr_storage mkaddr(const char* address, uint16_t port)
     {
@@ -73,6 +82,36 @@ namespace goofy::settings
     struct sockaddr_storage mkaddr(const std::string& address, uint16_t port)
     {
         return mkaddr(address.c_str(), port);
+    }
+
+    template <>
+    void ConfItem<uint16_t>::store_to(std::FILE* f) const
+    {
+        fprintf(f, "%s %hu\n", name, value);
+    }
+
+    template <>
+    void ConfItem<sockaddr_storage>::store_to(std::FILE* f) const
+    {
+        fprintf(f, "%s ...not trivial\n", name);
+    }
+
+    template <>
+    void ConfItem<std::string>::store_to(std::FILE* f) const
+    {
+        fprintf(f, "%s %s\n", name, value.c_str());
+    }
+
+    template <>
+    void ConfItem<unsigned>::store_to(std::FILE* f) const
+    {
+        fprintf(f, "%s %u\n", name, value);
+    }
+
+    template <>
+    void ConfItem<bool>::store_to(std::FILE* f) const
+    {
+        fprintf(f, "%s %s\n", name, value ? "yes" : "no");
     }
 
 }

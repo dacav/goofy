@@ -1,23 +1,36 @@
 #pragma once
 
 #include <cstdint>
+#include <cstdio>
 #include <string>
+#include <map>
 
 #include <unistd.h>
 #include <arpa/inet.h>
 
 namespace goofy::settings
 {
+    struct ConfItemBase
+    {
+        ConfItemBase(const char* n) : name(n) {}
+
+        const char* name;
+        virtual void store_to(std::FILE*) const = 0;
+    };
+
     template <typename Type>
-    struct ConfItem
+    struct ConfItem : public ConfItemBase
     {
         Type value;
-        const char* name;
 
-        ConfItem(const char* n, Type v) :
-            name(n),
+        ConfItem(
+                std::map<std::string, ConfItemBase*>& confmap,
+                const char* n,
+                Type v) :
+            ConfItemBase(n),
             value(v)
         {
+            confmap[n] = this;
         }
 
         const Type& read() const
@@ -25,6 +38,7 @@ namespace goofy::settings
             return value;
         }
 
+        void store_to(std::FILE* f) const override;
     };
 
     struct sockaddr_storage mkaddr(const char* address, uint16_t port);
@@ -32,20 +46,17 @@ namespace goofy::settings
 
     struct Settings
     {
+        std::map<std::string, ConfItemBase*> confmap;
+
         ConfItem<uint16_t> tcp_port;
         ConfItem<sockaddr_storage> bind_addr;
         ConfItem<std::string> host_name;
         ConfItem<unsigned> listen_backlog;
         ConfItem<bool> sock_reusable;
 
-        Settings() :
-            tcp_port("net.tcp_port", 7070),
-            bind_addr("net.bind_addr", mkaddr("::1", tcp_port)),
-            host_name("net.host_name", "localhost"),
-            listen_backlog("net.listen_backlog", 10),
-            sock_reusable("net.sock_reusable", true)
-        {
-        }
+        // Uses compile-time defaults
+        Settings();
+
     };
 
 
