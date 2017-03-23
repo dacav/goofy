@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <cassert>
+#include <memory>
 
 #include "error.h"
 #include "settings.h"
@@ -67,6 +68,29 @@ namespace goofy::settings
         listen_backlog(confmap, "net.listen_backlog", 10),
         sock_reusable(confmap, "net.sock_reusable", true)
     {
+    }
+
+    Settings::Settings(const std::string& path) :
+        Settings()
+    {
+        auto file = fopen(path.c_str(), "rt");
+        if (file == nullptr) {
+            throw IOError("Opening" + path, errno);
+        }
+        std::unique_ptr<FILE, int(*)(FILE*)> raii(file, fclose);
+    }
+
+    void Settings::save(const std::string& path)
+    {
+        auto file = fopen(path.c_str(), "wt");
+        if (file == nullptr) {
+            throw IOError("Opening" + path, errno);
+        }
+        std::unique_ptr<FILE, int(*)(FILE*)> raii(file, fclose);
+
+        for (auto& pair : confmap) {
+            pair.second->store_to(file);
+        }
     }
 
     struct sockaddr_storage mkaddr(const char* address, uint16_t port)
