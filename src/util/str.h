@@ -21,6 +21,7 @@ namespace goofy::util
         const char* start;
         size_t len;
         bool empty() const;
+        void trim();
 
         operator std::string() const;
     };

@@ -16,6 +16,7 @@ namespace goofy::util
     {
         public:
             Reader();
+            Reader(const std::string& filename);
             ~Reader();
 
             void feed(const std::string& filename);

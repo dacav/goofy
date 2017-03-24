@@ -2,6 +2,7 @@
 #include "../error.h"
 
 #include <algorithm>
+#include <cctype>
 
 namespace goofy::util
 {
@@ -34,11 +35,6 @@ namespace goofy::util
         return std::string(start, len);
     }
 
-    bool StrRef::empty() const
-    {
-        return start == nullptr;
-    }
-
     StrRef& StrRef::operator++(int)
     {
         start += 1;
@@ -51,6 +47,21 @@ namespace goofy::util
         start += offs;
         len -= offs;
         return *this;
+    }
+
+    bool StrRef::empty() const
+    {
+        return start == nullptr;
+    }
+
+    void StrRef::trim()
+    {
+        while (len > 0 && isspace(*start)) {
+            (*this)++;
+        }
+        while (len > 0 && isspace(*(start + len - 1))) {
+            len --;
+        }
     }
 
     std::list<StrRef> tokenize(const StrRef& str, char sep)

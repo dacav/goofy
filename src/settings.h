@@ -16,6 +16,7 @@ namespace goofy::settings
 
         const char* name;
         virtual void store_to(std::FILE*) const = 0;
+        virtual void parse_assign(const char* line, size_t len) = 0;
     };
 
     template <typename Type>
@@ -39,6 +40,7 @@ namespace goofy::settings
         }
 
         void store_to(std::FILE* f) const override;
+        void parse_assign(const char* line, size_t len) override;
     };
 
     struct sockaddr_storage mkaddr(const char* address, uint16_t port);

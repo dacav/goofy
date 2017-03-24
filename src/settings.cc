@@ -2,9 +2,11 @@
 #include <arpa/inet.h>
 #include <cassert>
 #include <memory>
+#include <iostream>
 
 #include "error.h"
 #include "settings.h"
+#include "util/fileread.h"
 
 namespace
 {
@@ -73,11 +75,35 @@ namespace goofy::settings
     Settings::Settings(const std::string& path) :
         Settings()
     {
-        auto file = fopen(path.c_str(), "rt");
-        if (file == nullptr) {
-            throw IOError("Opening" + path, errno);
+        util::Reader reader(path);
+        const char* blanks = " \t";
+        while (!reader.eof()) {
+            util::StrRef lineref = reader.next();
+            lineref.trim();
+            if (lineref.len == 0) continue;         // skip empty line
+            if (*lineref.start == '#') continue;    // skip comment
+
+            std::string key(lineref);
+            auto end_key = key.find_first_of(blanks);
+
+            if (end_key == key.npos) {
+                // TODO: decent logging
+                std::cerr << "Ignoring line [" << key << "]" << std::endl;
+                continue;
+            }
+
+            key.erase(end_key);
+
+            auto search = confmap.find(key);
+            if (search == confmap.end()) {
+                std::cerr << "No such key [" << key << "]" << std::endl;
+                continue;
+            }
+
+            lineref += end_key + 1;
+            lineref.trim();
+            search->second->parse_assign(lineref.start, lineref.len);
         }
-        std::unique_ptr<FILE, int(*)(FILE*)> raii(file, fclose);
     }
 
     void Settings::save(const std::string& path)
@@ -115,9 +141,21 @@ namespace goofy::settings
     }
 
     template <>
+    void ConfItem<uint16_t>::parse_assign(const char* line, size_t len)
+    {
+        fprintf(stderr, "parse u16 %s\n", std::string(line, len).c_str());
+    }
+
+    template <>
     void ConfItem<sockaddr_storage>::store_to(std::FILE* f) const
     {
         fprintf(f, "%s ...not trivial\n", name);
+    }
+
+    template <>
+    void ConfItem<sockaddr_storage>::parse_assign(const char* line, size_t len)
+    {
+        fprintf(stderr, "parse addr %s\n", std::string(line, len).c_str());
     }
 
     template <>
@@ -127,15 +165,33 @@ namespace goofy::settings
     }
 
     template <>
+    void ConfItem<std::string>::parse_assign(const char* line, size_t len)
+    {
+        fprintf(stderr, "parse str %s\n", std::string(line, len).c_str());
+    }
+
+    template <>
     void ConfItem<unsigned>::store_to(std::FILE* f) const
     {
         fprintf(f, "%s %u\n", name, value);
     }
 
     template <>
+    void ConfItem<unsigned>::parse_assign(const char* line, size_t len)
+    {
+        fprintf(stderr, "parse uint %s\n", std::string(line, len).c_str());
+    }
+
+    template <>
     void ConfItem<bool>::store_to(std::FILE* f) const
     {
         fprintf(f, "%s %s\n", name, value ? "yes" : "no");
+    }
+
+    template <>
+    void ConfItem<bool>::parse_assign(const char* line, size_t len)
+    {
+        fprintf(stderr, "parse bool %s\n", std::string(line, len).c_str());
     }
 
 }

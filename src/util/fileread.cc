@@ -16,6 +16,12 @@ namespace goofy::util
     {
     }
 
+    Reader::Reader(const std::string& filename) :
+        Reader()
+    {
+        feed(filename);
+    }
+
     void Reader::feed(const std::string& filename)
     {
         feed(filename.c_str());
