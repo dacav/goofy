@@ -24,7 +24,10 @@ namespace goofy::util
 
             bool eof() const;
 
-            // Returns a string_view over a null-terminated byte sequence.
+            // Returns a StrRef over the next line. The underlying string is
+            // always null-terminated and does not have a trailing new-line
+            // symbol. The reference is valid up to the subsequent call of
+            // next().
             StrRef next();
 
         private:
