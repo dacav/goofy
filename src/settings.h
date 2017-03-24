@@ -34,6 +34,8 @@ namespace goofy::settings
             confmap[n] = this;
         }
 
+        ConfItem(const ConfItem&) = delete;
+
         const Type& read() const
         {
             return value;
@@ -50,7 +52,7 @@ namespace goofy::settings
     {
         std::map<std::string, ConfItemBase*> confmap;
 
-        ConfItem<uint16_t> tcp_port;
+        ConfItem<in_port_t> tcp_port;
         ConfItem<sockaddr_storage> bind_addr;
         ConfItem<std::string> host_name;
         ConfItem<unsigned> listen_backlog;

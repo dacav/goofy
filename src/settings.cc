@@ -99,7 +99,9 @@ namespace goofy::settings
 
             lineref += end_key + 1;
             lineref.ltrim();
-            search->second->parse_assign(lineref.start, lineref.len);
+            auto& item = *(search->second);
+
+            item.parse_assign(lineref.start, lineref.len);
         }
     }
 
@@ -121,68 +123,90 @@ namespace goofy::settings
         struct sockaddr_storage storage;
         if (parse4(storage, address, port) == nullptr
                 && parse6(storage, address, port) == nullptr) {
-            throw goofy::Error(std::string("Cannot parse address: ") + address);
+            throw goofy::ConfigError(std::string("Cannot parse address: ") + address);
         }
         return storage;
-    }
-
-    struct sockaddr_storage mkaddr(const std::string& address, uint16_t port)
-    {
-        return mkaddr(address.c_str(), port);
     }
 
     template <>
     void ConfItem<uint16_t>::store_to(std::FILE* f) const
     {
-        fprintf(f, "%s %hu\n", name, value);
+        std::fprintf(f, "%s %hu\n", name, value);
     }
 
     template <>
     void ConfItem<uint16_t>::parse_assign(const char* line, size_t len)
     {
-        fprintf(stderr, "parse u16 %s\n", std::string(line, len).c_str());
+        uint16_t v;
+        const int result = sscanf(line, "%hu", &v); // beware, not using len :(
+        if (result == 0 || result == EOF) {
+            throw goofy::ConfigError("Invalid uint16: " + std::string(line, len));
+        }
+        value = v;
     }
 
     template <>
     void ConfItem<sockaddr_storage>::store_to(std::FILE* f) const
     {
-        fprintf(f, "%s ...not trivial\n", name);
+        const sockaddr& addr = reinterpret_cast<const sockaddr&>(value);
+        const int af = addr.sa_family;
+
+        in_port_t port;
+        size_t buflen;
+        switch (af) {
+            case AF_INET:
+                port = reinterpret_cast<const sockaddr_in&>(addr).sin_port;
+                buflen = INET_ADDRSTRLEN;
+                break;
+            case AF_INET6:
+                port = reinterpret_cast<const sockaddr_in6&>(addr).sin6_port;
+                buflen = INET6_ADDRSTRLEN;
+                break;
+            default:
+                assert(0); // did we invent more?
+        }
+
+        std::unique_ptr<char[]> buffer(new char[buflen]);
+        const char* out = inet_ntop(af, &value, buffer.get(), buflen);
+        if (out == nullptr) {
+            throw ConfigError("Cannot serialize " + std::string(name), errno);
+        }
+        std::fprintf(f, "%s %s %hu\n", name, out, port);
     }
 
     template <>
     void ConfItem<sockaddr_storage>::parse_assign(const char* line, size_t len)
     {
-        fprintf(stderr, "parse addr %s\n", std::string(line, len).c_str());
     }
 
     template <>
     void ConfItem<std::string>::store_to(std::FILE* f) const
     {
-        fprintf(f, "%s %s\n", name, value.c_str());
+        std::fprintf(f, "%s %s\n", name, value.c_str());
     }
 
     template <>
     void ConfItem<std::string>::parse_assign(const char* line, size_t len)
     {
-        fprintf(stderr, "parse str %s\n", std::string(line, len).c_str());
+        std::fprintf(stderr, "parse str %s\n", std::string(line, len).c_str());
     }
 
     template <>
     void ConfItem<unsigned>::store_to(std::FILE* f) const
     {
-        fprintf(f, "%s %u\n", name, value);
+        std::fprintf(f, "%s %u\n", name, value);
     }
 
     template <>
     void ConfItem<unsigned>::parse_assign(const char* line, size_t len)
     {
-        fprintf(stderr, "parse uint %s\n", std::string(line, len).c_str());
+        std::fprintf(stderr, "parse uint %s\n", std::string(line, len).c_str());
     }
 
     template <>
     void ConfItem<bool>::store_to(std::FILE* f) const
     {
-        fprintf(f, "%s %s\n", name, value ? "yes" : "no");
+        std::fprintf(f, "%s %s\n", name, value ? "yes" : "no");
     }
 
     template <>
