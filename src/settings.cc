@@ -87,17 +87,14 @@ namespace goofy::settings
             auto end_key = key.find_first_of(blanks);
 
             if (end_key == key.npos) {
-                // TODO: decent logging
-                std::cerr << "Ignoring line [" << key << "]" << std::endl;
-                continue;
+                throw goofy::ConfigError("Invalid line: " + key);
             }
 
             key.erase(end_key);
 
             auto search = confmap.find(key);
             if (search == confmap.end()) {
-                std::cerr << "No such key [" << key << "]" << std::endl;
-                continue;
+                throw goofy::ConfigError("No such key: " + key);
             }
 
             lineref += end_key + 1;
