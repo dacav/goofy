@@ -21,7 +21,11 @@ namespace goofy::util
         const char* start;
         size_t len;
         bool empty() const;
-        void trim();
+
+        // Trims the left part of the string, removing spaces.
+        // (note: rtrim is not implemented, since we treat the underlying
+        // string as constant, and we cannot write a null-terminator.
+        void ltrim();
 
         operator std::string() const;
     };

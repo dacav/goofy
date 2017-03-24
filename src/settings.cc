@@ -79,7 +79,7 @@ namespace goofy::settings
         const char* blanks = " \t";
         while (!reader.eof()) {
             util::StrRef lineref = reader.next();
-            lineref.trim();
+            lineref.ltrim();
             if (lineref.len == 0) continue;         // skip empty line
             if (*lineref.start == '#') continue;    // skip comment
 
@@ -101,7 +101,7 @@ namespace goofy::settings
             }
 
             lineref += end_key + 1;
-            lineref.trim();
+            lineref.ltrim();
             search->second->parse_assign(lineref.start, lineref.len);
         }
     }

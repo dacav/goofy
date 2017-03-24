@@ -37,13 +37,18 @@ namespace goofy::util
 
     StrRef& StrRef::operator++(int)
     {
-        start += 1;
-        len --;
+        if (len > 0) {
+            start += 1;
+            len --;
+        }
         return *this;
     }
 
     StrRef& StrRef::operator+=(int offs)
     {
+        if (offs > len) {
+            offs = len;
+        }
         start += offs;
         len -= offs;
         return *this;
@@ -54,13 +59,10 @@ namespace goofy::util
         return start == nullptr;
     }
 
-    void StrRef::trim()
+    void StrRef::ltrim()
     {
         while (len > 0 && isspace(*start)) {
             (*this)++;
-        }
-        while (len > 0 && isspace(*(start + len - 1))) {
-            len --;
         }
     }
 
