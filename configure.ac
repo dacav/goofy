@@ -34,5 +34,5 @@ dnl  Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
 AC_CHECK_FUNCS([memchr memset strerror strstr strtoul])
 
-AC_CONFIG_FILES([Makefile] [src/Makefile])
+AC_CONFIG_FILES([Makefile] [src/Makefile] [tests/Makefile])
 AC_OUTPUT

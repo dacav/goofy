@@ -1,2 +1,2 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = src
+SUBDIRS = src tests
