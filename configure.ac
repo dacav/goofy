@@ -12,8 +12,12 @@ dnl  Checks for programs.
 AC_PROG_CXX
 
 dnl  Checks for libraries.
-AC_CHECK_LIB([magic], [magic_open])
-AC_CHECK_LIB([event], [event_new])
+AC_SEARCH_LIBS([magic_open], [magic], [],
+    AC_MSG_ERROR([Please install libmagic])
+)
+AC_SEARCH_LIBS([event_new], [event], [],
+    AC_MSG_ERROR([Please install libevent2])
+)
 
 dnl  Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h sys/socket.h unistd.h])
@@ -30,5 +34,5 @@ dnl  Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
 AC_CHECK_FUNCS([memchr memset strerror strstr strtoul])
 
-AC_CONFIG_FILES([Makefile] [src/Makefile])
+AC_CONFIG_FILES([Makefile] [src/Makefile] [tests/Makefile])
 AC_OUTPUT

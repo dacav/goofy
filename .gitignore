@@ -30,6 +30,7 @@ configure
 depcomp
 install-sh
 missing
+test-driver
 src/.deps/
 src/.dirstamp
 src/Makefile
