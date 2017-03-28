@@ -91,9 +91,7 @@ namespace goofy::util
             cursor = end + 1;
             remains -= len + 1;
         }
-        if (remains) {
-            out.emplace_back(cursor, remains);
-        }
+        out.emplace_back(cursor, remains);
 
         return out;
     }
