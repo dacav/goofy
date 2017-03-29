@@ -96,20 +96,4 @@ namespace goofy::util
         return out;
     }
 
-    template <>
-    uint16_t strto(const std::string& string)
-    {
-        char* end = nullptr;
-        errno = 0;
-        auto val = strtoul(string.data(), &end, 10);
-        if (val == 0 && (errno != 0 || end == string.data())) {
-            std::string err("Invalid uint16: '");
-            err += string;
-            err += '\'';
-            throw Error(err, errno);
-        }
-
-        return val;
-    }
-
 }

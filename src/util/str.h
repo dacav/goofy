@@ -2,7 +2,10 @@
 
 #include <list>
 #include <utility>
+#include <limits>
 #include <string>
+
+#include "error.h"
 
 namespace goofy::util
 {
@@ -33,5 +36,23 @@ namespace goofy::util
     std::list<StrRef> tokenize(const StrRef&, char sep);
 
     template <typename T>
-    T strto(const std::string& str);
+    T strto(const std::string& str)
+    {
+        char* end = nullptr;
+        errno = 0;
+        auto val = strtoul(str.data(), &end, 10);
+        if (val == 0 && (errno != 0 || end == str.data())) {
+            throw Error("Invalid integer: '" + str + '\'', errno);
+        }
+        const auto max = std::numeric_limits<T>::max();
+        const auto min = std::numeric_limits<T>::min();
+        if (val > max || val < min) {
+            throw Error("Value " + std::to_string(val)
+                + " not in range ["
+                + std::to_string(min) + ':' + std::to_string(max) + ']'
+            );
+        }
+
+        return val;
+    }
 }
