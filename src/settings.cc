@@ -129,24 +129,28 @@ namespace goofy::settings
     }
 
     template <>
-    void ConfItem<uint16_t>::store_to(std::FILE* f) const
+    size_t ConfItem<uint16_t>::store_to(std::FILE* f) const
     {
-        std::fprintf(f, "%s %hu\n", name, value);
+        const int ret = std::fprintf(f, "%s %hu\n", name, value);
+        if (ret < 0) {
+            throw IOError("fprintf failure");
+        }
+        return size_t(ret);
     }
 
     template <>
     void ConfItem<uint16_t>::parse_assign(const char* line, size_t len)
     {
-        uint16_t v;
-        const int result = sscanf(line, "%hu", &v); // beware, not using len :(
-        if (result == 0 || result == EOF) {
-            throw goofy::ConfigError("Invalid uint16: " + std::string(line, len));
+        try {
+            value = util::strto<uint16_t>(std::string(line, len));
         }
-        value = v;
+        catch(Error& e) {
+            throw goofy::ConfigError("Invalid uint16: " + std::string(e.what()));
+        }
     }
 
     template <>
-    void ConfItem<sockaddr_storage>::store_to(std::FILE* f) const
+    size_t ConfItem<sockaddr_storage>::store_to(std::FILE* f) const
     {
         const sockaddr& addr = reinterpret_cast<const sockaddr&>(value);
         const int af = addr.sa_family;
@@ -171,7 +175,11 @@ namespace goofy::settings
         if (out == nullptr) {
             throw ConfigError("Cannot serialize " + std::string(name), errno);
         }
-        std::fprintf(f, "%s %s %hu\n", name, out, port);
+        const int ret = std::fprintf(f, "%s %s %hu\n", name, out, port);
+        if (ret < 0) {
+            throw IOError("fprintf failure");
+        }
+        return size_t(ret);
     }
 
     template <>
@@ -180,9 +188,13 @@ namespace goofy::settings
     }
 
     template <>
-    void ConfItem<std::string>::store_to(std::FILE* f) const
+    size_t ConfItem<std::string>::store_to(std::FILE* f) const
     {
-        std::fprintf(f, "%s %s\n", name, value.c_str());
+        const int ret = std::fprintf(f, "%s %s\n", name, value.c_str());
+        if (ret < 0) {
+            throw IOError("fprintf failure");
+        }
+        return size_t(ret);
     }
 
     template <>
@@ -192,9 +204,13 @@ namespace goofy::settings
     }
 
     template <>
-    void ConfItem<unsigned>::store_to(std::FILE* f) const
+    size_t ConfItem<unsigned>::store_to(std::FILE* f) const
     {
-        std::fprintf(f, "%s %u\n", name, value);
+        const int ret = std::fprintf(f, "%s %u\n", name, value);
+        if (ret < 0) {
+            throw IOError("fprintf failure");
+        }
+        return size_t(ret);
     }
 
     template <>
@@ -204,9 +220,13 @@ namespace goofy::settings
     }
 
     template <>
-    void ConfItem<bool>::store_to(std::FILE* f) const
+    size_t ConfItem<bool>::store_to(std::FILE* f) const
     {
-        std::fprintf(f, "%s %s\n", name, value ? "yes" : "no");
+        const int ret = std::fprintf(f, "%s %s\n", name, value ? "yes" : "no");
+        if (ret < 0) {
+            throw IOError("fprintf failure");
+        }
+        return size_t(ret);
     }
 
     template <>

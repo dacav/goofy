@@ -15,21 +15,25 @@ namespace goofy::settings
         ConfItemBase(const char* n) : name(n) {}
 
         const char* name;
-        virtual void store_to(std::FILE*) const = 0;
+        virtual size_t store_to(std::FILE*) const = 0;
         virtual void parse_assign(const char* line, size_t len) = 0;
     };
+
+    using ConfMap = std::map<std::string, ConfItemBase*>;
 
     template <typename Type>
     struct ConfItem : public ConfItemBase
     {
         Type value;
 
-        ConfItem(
-                std::map<std::string, ConfItemBase*>& confmap,
-                const char* n,
-                Type v) :
+        ConfItem(const char* n, Type v) :
             ConfItemBase(n),
             value(v)
+        {
+        }
+
+        ConfItem(ConfMap& confmap, const char*n, Type v) :
+            ConfItem(n, v)
         {
             confmap[n] = this;
         }
@@ -41,7 +45,7 @@ namespace goofy::settings
             return value;
         }
 
-        void store_to(std::FILE* f) const override;
+        size_t store_to(std::FILE* f) const override;
         void parse_assign(const char* line, size_t len) override;
     };
 
