@@ -128,6 +128,21 @@ namespace goofy::settings
         return storage;
     }
 
+    /* Covers all integer types using strto */
+    template <typename IntT>
+    void ConfItem<IntT>::parse_assign(const char* line, size_t len)
+    {
+        try {
+            value = util::strto<IntT>(std::string(line, len));
+        }
+        catch(Error& e) {
+            throw goofy::ConfigError(
+                std::string("Invalid value for")
+                + name + ": " + e.what()
+            );
+        }
+    }
+
     template <>
     size_t ConfItem<uint16_t>::store_to(std::FILE* f) const
     {
@@ -136,17 +151,6 @@ namespace goofy::settings
             throw IOError("fprintf failure");
         }
         return size_t(ret);
-    }
-
-    template <>
-    void ConfItem<uint16_t>::parse_assign(const char* line, size_t len)
-    {
-        try {
-            value = util::strto<uint16_t>(std::string(line, len));
-        }
-        catch(Error& e) {
-            throw goofy::ConfigError("Invalid uint16: " + std::string(e.what()));
-        }
     }
 
     template <>
@@ -211,12 +215,6 @@ namespace goofy::settings
             throw IOError("fprintf failure");
         }
         return size_t(ret);
-    }
-
-    template <>
-    void ConfItem<unsigned>::parse_assign(const char* line, size_t len)
-    {
-        std::fprintf(stderr, "parse uint %s\n", std::string(line, len).c_str());
     }
 
     template <>

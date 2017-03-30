@@ -67,6 +67,9 @@ void test_serialization(const char* name, const T& value)
     reloaded.ltrim();
 
     settings::ConfItem<T> item(name, T());
+
+    // If this is not the case, our test doesn't mean anything:
+    // It would not prove that we could parse it correctly.
     assert(item.value != value);
 
     std::cerr << "dumped: ["
@@ -74,12 +77,13 @@ void test_serialization(const char* name, const T& value)
         << "]" << std::endl;
     item.parse_assign(reloaded.start, reloaded.len);
     std::cerr
-        << "reloaded value: " << value << std::endl
-        << "original value: " << item.value << std::endl;
+        << "original value: " << value << std::endl
+        << "reloaded value: " << item.value << std::endl;
     assert(item.value == value);
 }
 
 int main(int argc, char** argv)
 {
     test_serialization<uint16_t>("net.tcp_port", 7070);
+    test_serialization<unsigned>("foo.bar", 1024);
 }
