@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <cstring>
 #include <memory>
 #include <cassert>
 #include <array>
@@ -42,7 +43,10 @@ TmpFile::TmpFile()
 
 TmpFile::~TmpFile()
 {
-    ::unlink(name.c_str());
+    if (::unlink(name.c_str()) == -1) {
+        std::cerr << "Could not unlink! "
+            << std::strerror(errno) << std::endl;
+    }
 }
 
 template <typename T>
