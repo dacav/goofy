@@ -8,7 +8,8 @@ using namespace goofy;
 
 namespace
 {
-    void test_base();
+    void test_strto();
+    void test_strref();
 
     void test_tokenizer(
         const std::string testcase,
@@ -18,7 +19,9 @@ namespace
 
 int main(int argc, char** argv)
 {
-    test_base();
+    test_strto();
+
+    test_strref();
 
     test_tokenizer("hello world", {"hello", "world"});
     test_tokenizer("hello", {"hello"});
@@ -31,8 +34,23 @@ int main(int argc, char** argv)
 
 namespace
 {
-    void test_base()
+    void test_strto()
     {
+        std::cerr << "--- test_strto ---" << std::endl;
+
+        assert(util::strto<uint16_t>("10") == 10);
+        try {
+            util::strto<uint16_t>("65536");
+            assert(false);
+        }
+        catch (Error& e) {
+            std::cerr << "Expected error: " << e.what() << std::endl;
+        }
+    }
+
+    void test_strref()
+    {
+        std::cerr << "--- test_strref ---" << std::endl;
         const std::string hello("   hello world ");
 
         util::StrRef ref(hello);
