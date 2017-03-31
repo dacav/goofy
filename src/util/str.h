@@ -38,21 +38,26 @@ namespace goofy::util
     template <typename T>
     T strto(const std::string& str)
     {
-        char* end = nullptr;
-        errno = 0;
-        auto val = strtoul(str.data(), &end, 10);
-        if (val == 0 && (errno != 0 || end == str.data())) {
-            throw Error("Invalid integer: '" + str + '\'', errno);
+        size_t len = 0;
+        const long long max = std::numeric_limits<T>::max();
+        const long long min = std::numeric_limits<T>::min();
+
+        try {
+            const long long val = std::stoll(str, &len);
+
+            if (val < min || val > max) {
+                throw Error("Value '" + str + "' out of range [" +
+                    std::to_string(min) + ':' + std::to_string(max) + ']'
+                );
+            }
+
+            return T(val);
         }
-        const auto max = std::numeric_limits<T>::max();
-        const auto min = std::numeric_limits<T>::min();
-        if (val > max || val < min) {
-            throw Error("Value " + std::to_string(val)
-                + " not in range ["
-                + std::to_string(min) + ':' + std::to_string(max) + ']'
+        catch (std::out_of_range& e) {
+            throw Error("Value '" + str + "' out of range [" +
+                std::to_string(min) + ':' + std::to_string(max) + ']'
             );
         }
 
-        return val;
     }
 }
