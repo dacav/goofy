@@ -11,6 +11,9 @@ namespace
     template <typename IntType>
     void test_strto();
 
+    void test_strto_u64();
+    void test_strto_s64();
+
     void test_strref();
 
     void test_tokenizer(
@@ -27,8 +30,8 @@ int main(int argc, char** argv)
     test_strto<uint16_t>();
     test_strto<int32_t>();
     test_strto<uint32_t>();
-    //test_strto<int64_t>();
-    //test_strto<uint64_t>();
+    test_strto_s64();
+    test_strto_u64();
 
     test_strref();
 
@@ -75,6 +78,65 @@ namespace
             std::cerr << "Expected error: " << e.what() << std::endl;
         }
 
+    }
+
+    void test_strto_u64()
+    {
+        std::cerr << "--- test_strto_u64 ---" << std::endl;
+
+        const uint64_t min = std::numeric_limits<uint64_t>::min();
+        const uint64_t max = std::numeric_limits<uint64_t>::max();
+
+        assert_equals(util::strto<uint64_t>(std::to_string(min)), min);
+        assert_equals(util::strto<uint64_t>(std::to_string(max)), max);
+
+        try {
+            std::cerr << util::strto<uint64_t>("-1") << std::endl;
+            assert(false);
+        }
+        catch (Error& e) {
+            std::cerr << "Expected error: " << e.what() << std::endl;
+        }
+
+        try {
+            //max=18446744073709551615, reading max + 1
+            util::strto<int64_t>("18446744073709551616");
+            assert(false);
+        }
+        catch (Error& e) {
+            std::cerr << "Expected error: " << e.what() << std::endl;
+        }
+
+
+    }
+
+    void test_strto_s64()
+    {
+        std::cerr << "--- test_strto_s64 ---" << std::endl;
+
+        const int64_t min = std::numeric_limits<int64_t>::min();
+        const int64_t max = std::numeric_limits<int64_t>::max();
+
+        assert_equals(util::strto<int64_t>(std::to_string(min)), min);
+        assert_equals(util::strto<int64_t>(std::to_string(max)), max);
+
+        try {
+            // min=-9223372036854775808, reading min-1
+            util::strto<int64_t>("-9223372036854775809");
+            assert(false);
+        }
+        catch (Error& e) {
+            std::cerr << "Expected error: " << e.what() << std::endl;
+        }
+
+        try {
+            // max=9223372036854775807, reading max+1
+            util::strto<int64_t>("9223372036854775808");
+            assert(false);
+        }
+        catch (Error& e) {
+            std::cerr << "Expected error: " << e.what() << std::endl;
+        }
     }
 
     void test_strref()

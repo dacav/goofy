@@ -96,4 +96,29 @@ namespace goofy::util
         return out;
     }
 
+    template <>
+    uint64_t strto(const std::string& str)
+    {
+        const int64_t min = std::numeric_limits<uint64_t>::min();
+        const int64_t max = std::numeric_limits<uint64_t>::max();
+        StrRef ref(str);
+        ref.ltrim();
+        if (ref.start[0] == '-') {
+            throw Error("Value '" + str + "' out of range [" +
+                std::to_string(min) + ':' + std::to_string(max) + ']'
+            );
+        }
+
+        try {
+            size_t len = 0;
+            return std::stoull(str, &len);
+        }
+        catch (std::out_of_range& e) {
+            throw Error("Value '" + str + "' out of range [" +
+                std::to_string(min) + ':' + std::to_string(max) + ']'
+            );
+        }
+    }
+
+
 }

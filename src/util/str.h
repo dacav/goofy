@@ -60,4 +60,7 @@ namespace goofy::util
         }
 
     }
+
+    template <> uint64_t strto(const std::string& str);
+
 }
