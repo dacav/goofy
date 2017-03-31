@@ -46,7 +46,7 @@ namespace
     template <typename T1, typename T2>
     void assert_equals(const T1& v1, const T2& v2)
     {
-        std::cerr << "assert(" << (long long)(v1) << " == " << (long long)(v2) << ")" << std::endl;
+        std::cerr << "assert(" << int64_t(v1) << " == " << int64_t(v2) << ")" << std::endl;
         assert(v1 == v2);
     }
 
@@ -55,13 +55,13 @@ namespace
     {
         std::cerr << "--- test_strto ---" << std::endl;
 
-        const long long min = std::numeric_limits<IntType>::min();
-        const long long max = std::numeric_limits<IntType>::max();
+        const int64_t min = std::numeric_limits<IntType>::min();
+        const int64_t max = std::numeric_limits<IntType>::max();
         assert_equals(util::strto<IntType>(std::to_string(min)), min);
         assert_equals(util::strto<IntType>(std::to_string(max)), max);
 
         try {
-            util::strto<IntType>(std::to_string((long long)(max + 1)));
+            util::strto<IntType>(std::to_string(int64_t(max + 1)));
             assert(false);
         }
         catch (Error& e) {
