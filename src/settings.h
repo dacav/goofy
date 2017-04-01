@@ -26,13 +26,13 @@ namespace goofy::settings
     {
         Type value;
 
-        ConfItem(const char* n, Type v) :
+        ConfItem(const char* n, const Type& v) :
             ConfItemBase(n),
             value(v)
         {
         }
 
-        ConfItem(ConfMap& confmap, const char*n, Type v) :
+        ConfItem(ConfMap& confmap, const char*n, const Type& v) :
             ConfItem(n, v)
         {
             confmap[n] = this;

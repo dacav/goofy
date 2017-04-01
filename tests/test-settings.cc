@@ -4,6 +4,7 @@
 #include <memory>
 #include <cassert>
 #include <array>
+#include <ostream>
 
 #include "error.h"
 #include "settings.h"
@@ -11,7 +12,8 @@
 
 using namespace goofy;
 
-class TmpFile {
+class TmpFile
+{
     public:
         TmpFile();
         ~TmpFile();
@@ -49,6 +51,27 @@ TmpFile::~TmpFile()
     }
 }
 
+bool operator==(const sockaddr_storage& s1, const sockaddr_storage& s2)
+{
+    return memcmp(&s1, &s2, sizeof(sockaddr_storage)) == 0;
+}
+
+bool operator!=(const sockaddr_storage& s1, const sockaddr_storage& s2)
+{
+    return !(s1 == s2);
+}
+
+std::ostream& operator<<(std::ostream& stream, const sockaddr_storage& s)
+{
+    const char* cursor = (const char*)&s;
+    const char* const end = cursor + sizeof(sockaddr_storage);
+    while (cursor < end) {
+        std::cerr << " 0x" << std::hex << (unsigned(*cursor) & 0xff);
+        cursor ++;
+    }
+    return stream;
+}
+
 template <typename T>
 void test_serialization(const char* name, const T& value)
 {
@@ -76,13 +99,10 @@ void test_serialization(const char* name, const T& value)
     // It would not prove that we could parse it correctly.
     assert(item.value != value);
 
-    std::cerr << "dumped: ["
-        << std::string(reloaded)
-        << "]" << std::endl;
+    std::cerr << "dumped: [" << std::string(reloaded) << "]" << std::endl;
     item.parse_assign(reloaded.start, reloaded.len);
-    std::cerr
-        << "original value: " << value << std::endl
-        << "reloaded value: " << item.value << std::endl;
+    std::cerr << "original value: " << value << std::endl
+              << "reloaded value: " << item.value << std::endl;
     assert(item.value == value);
 }
 
@@ -90,4 +110,7 @@ int main(int argc, char** argv)
 {
     test_serialization<uint16_t>("net.tcp_port", 7070);
     test_serialization<unsigned>("foo.bar", 1024);
+    test_serialization<sockaddr_storage>("net.bindaddr", settings::mkaddr("127.0.0.1", 1234));
+    test_serialization<sockaddr_storage>("net.bindaddr", settings::mkaddr("::1", 1234));
+    test_serialization<std::string>("my.name", "pinocchio");
 }

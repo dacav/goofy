@@ -118,6 +118,11 @@ namespace goofy::settings
         }
     }
 
+    struct sockaddr_storage mkaddr(const std::string& address, uint16_t port)
+    {
+        return mkaddr(address.c_str(), port);
+    }
+
     struct sockaddr_storage mkaddr(const char* address, uint16_t port)
     {
         struct sockaddr_storage storage;
@@ -161,21 +166,29 @@ namespace goofy::settings
 
         in_port_t port;
         size_t buflen;
+        const void *parse_addr;
         switch (af) {
-            case AF_INET:
-                port = reinterpret_cast<const sockaddr_in&>(addr).sin_port;
+            case AF_INET: {
+                const sockaddr_in& addr_in = reinterpret_cast<const sockaddr_in&>(addr);
                 buflen = INET_ADDRSTRLEN;
+                port = addr_in.sin_port;
+                parse_addr = &addr_in.sin_addr;
                 break;
-            case AF_INET6:
-                port = reinterpret_cast<const sockaddr_in6&>(addr).sin6_port;
+            }
+            case AF_INET6: {
+                const sockaddr_in6& addr_in6 = reinterpret_cast<const sockaddr_in6&>(addr);
                 buflen = INET6_ADDRSTRLEN;
+                port = addr_in6.sin6_port;
+                parse_addr = &addr_in6.sin6_addr;
                 break;
+            }
             default:
                 assert(0); // did we invent more?
         }
+        port = ntohs(port);
 
         std::unique_ptr<char[]> buffer(new char[buflen]);
-        const char* out = inet_ntop(af, &value, buffer.get(), buflen);
+        const char* out = inet_ntop(af, parse_addr, buffer.get(), buflen);
         if (out == nullptr) {
             throw ConfigError("Cannot serialize " + std::string(name), errno);
         }
@@ -189,6 +202,14 @@ namespace goofy::settings
     template <>
     void ConfItem<sockaddr_storage>::parse_assign(const char* line, size_t len)
     {
+        std::string addr(line, len);
+        auto end = addr.find_first_of(" \t");
+        if (end == addr.npos) {
+            throw IOError("Invalid specification, missing port");
+        }
+        uint16_t port = util::strto<uint16_t>(addr.substr(end));
+        addr.resize(end);
+        value = mkaddr(addr, port);
     }
 
     template <>
@@ -204,7 +225,8 @@ namespace goofy::settings
     template <>
     void ConfItem<std::string>::parse_assign(const char* line, size_t len)
     {
-        std::fprintf(stderr, "parse str %s\n", std::string(line, len).c_str());
+        value = std::string(line, len);
+        value.pop_back();
     }
 
     template <>
