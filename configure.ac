@@ -4,7 +4,8 @@ dnl  Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.69])
 AC_INIT([goofy], [0.0.1], [dacav at openmailbox dot org])
 
-AM_INIT_AUTOMAKE([1.15])
+AM_INIT_AUTOMAKE([1.15] [foreign] [silent-rules])
+AM_SILENT_RULES([yes])
 AC_CONFIG_SRCDIR([src/main.cc])
 AC_CONFIG_HEADERS([src/config.h])
 
