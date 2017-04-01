@@ -11,14 +11,14 @@ AC_CONFIG_HEADERS([src/config.h])
 
 dnl  Checks for programs.
 AC_PROG_CXX
+PKG_PROG_PKG_CONFIG
 
 dnl  Checks for libraries.
 AC_SEARCH_LIBS([magic_open], [magic], [],
     AC_MSG_ERROR([Please install libmagic])
 )
-AC_SEARCH_LIBS([event_new], [event], [],
-    AC_MSG_ERROR([Please install libevent2])
-)
+
+PKG_CHECK_MODULES([EVENT], [libevent >= 2.0.0])
 
 dnl  Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h sys/socket.h unistd.h])
