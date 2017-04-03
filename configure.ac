@@ -18,7 +18,8 @@ AC_SEARCH_LIBS([magic_open], [magic], [],
     AC_MSG_ERROR([Please install libmagic])
 )
 
-PKG_CHECK_MODULES([EVENT], [libevent >= 2.0.0])
+PKG_CHECK_MODULES([event], [libevent >= 2.0.0])
+PKG_CHECK_MODULES([config], [libconfig++ >= 1.5])
 
 dnl  Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h sys/socket.h unistd.h])
