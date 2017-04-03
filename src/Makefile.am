@@ -1,6 +1,8 @@
 AUTOMAKE_OPTIONS = subdir-objects
 bin_PROGRAMS = goofyd
 
+goofyd_LDADD = $(EVENT_LIBS)
+goofyd_CFLAGS = $(EVENT_CFLAGS)
 goofyd_SOURCES =\
 	./session.cc\
 	./settings.cc\
