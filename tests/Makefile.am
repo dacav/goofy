@@ -4,10 +4,10 @@ check_PROGRAMS = \
 
 TESTS = $(check_PROGRAMS)
 
-LDADD = \
-	../src/util/str.o \
-	../src/util/fileread.o \
-	../src/settings.o
-
 test_str_SOURCES = test-str.cc
+test_str_LDADD = ../src/util/str.o
+
 test_settings_SOURCES = test-settings.cc
+test_settings_LDADD = ../src/settings.o
+test_settings_LDFLAGS = $(config_LIBS)
+test_settings_CFLAGS = $(config_CFLAGS)

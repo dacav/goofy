@@ -72,45 +72,23 @@ std::ostream& operator<<(std::ostream& stream, const sockaddr_storage& s)
     return stream;
 }
 
-template <typename T>
-void test_serialization(const char* name, const T& value)
+int main(int argc, char** argv)
 {
     TmpFile file;
+    settings::Settings sets;
 
-    const size_t len = settings::ConfItem<T>(name, value).store_to(file);
+    sets.save(file.name);
 
-    std::unique_ptr<char[]> large_enough(new char[len]);
     if (std::fseek(file, 0L, SEEK_SET) == -1) {
         throw IOError("fseek", errno);
     }
-    if (std::fread(large_enough.get(), len, 1, file) != 1) {
+    const size_t len = 4096;
+    std::unique_ptr<char[]> large_enough(new char[len]);
+    const size_t got = std::fread(large_enough.get(), 1, len, file);
+    if (got == 0) {
         throw IOError("fread");
     }
-
-    util::StrRef reloaded(large_enough.get(), len);
-
-    // Skipping the label
-    reloaded += strlen(name);
-    reloaded.ltrim();
-
-    settings::ConfItem<T> item(name, T());
-
-    // If this is not the case, our test doesn't mean anything:
-    // It would not prove that we could parse it correctly.
-    assert(item.value != value);
-
-    std::cerr << "dumped: [" << std::string(reloaded) << "]" << std::endl;
-    item.parse_assign(reloaded.start, reloaded.len);
-    std::cerr << "original value: " << value << std::endl
-              << "reloaded value: " << item.value << std::endl;
-    assert(item.value == value);
-}
-
-int main(int argc, char** argv)
-{
-    test_serialization<uint16_t>("net.tcp_port", 7070);
-    test_serialization<unsigned>("foo.bar", 1024);
-    test_serialization<sockaddr_storage>("net.bindaddr", settings::mkaddr("127.0.0.1", 1234));
-    test_serialization<sockaddr_storage>("net.bindaddr", settings::mkaddr("::1", 1234));
-    test_serialization<std::string>("my.name", "pinocchio");
+    if (std::fwrite(large_enough.get(), 1, got, stderr) == 0) {
+        throw IOError("write");
+    }
 }

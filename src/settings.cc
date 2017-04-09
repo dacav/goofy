@@ -4,9 +4,13 @@
 #include <memory>
 #include <iostream>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#include <libconfig.h++>
+
 #include "error.h"
 #include "settings.h"
-#include "util/fileread.h"
 
 namespace
 {
@@ -59,70 +63,6 @@ namespace
         }
     }
 
-} // anon namespace
-
-namespace goofy::settings
-{
-    Settings::Settings() :
-        tcp_port(confmap, "net.tcp_port", 7070),
-        bind_addr(confmap, "net.bind_addr", mkaddr("::1", tcp_port.read())),
-        host_name(confmap, "net.host_name", "localhost"),
-        listen_backlog(confmap, "net.listen_backlog", 10),
-        sock_reusable(confmap, "net.sock_reusable", true)
-    {
-    }
-
-    Settings::Settings(const std::string& path) :
-        Settings()
-    {
-        util::Reader reader(path);
-        const char* blanks = " \t";
-        while (!reader.eof()) {
-            util::StrRef lineref = reader.next();
-            lineref.ltrim();
-            if (lineref.len == 0) continue;         // skip empty line
-            if (*lineref.start == '#') continue;    // skip comment
-
-            std::string key(lineref);
-            auto end_key = key.find_first_of(blanks);
-
-            if (end_key == key.npos) {
-                throw goofy::ConfigError("Invalid line: " + key);
-            }
-
-            key.erase(end_key);
-
-            auto search = confmap.find(key);
-            if (search == confmap.end()) {
-                throw goofy::ConfigError("No such key: " + key);
-            }
-
-            lineref += end_key + 1;
-            lineref.ltrim();
-            auto& item = *(search->second);
-
-            item.parse_assign(lineref.start, lineref.len);
-        }
-    }
-
-    void Settings::save(const std::string& path)
-    {
-        auto file = fopen(path.c_str(), "wt");
-        if (file == nullptr) {
-            throw IOError("Opening" + path, errno);
-        }
-        std::unique_ptr<FILE, int(*)(FILE*)> raii(file, fclose);
-
-        for (auto& pair : confmap) {
-            pair.second->store_to(file);
-        }
-    }
-
-    struct sockaddr_storage mkaddr(const std::string& address, uint16_t port)
-    {
-        return mkaddr(address.c_str(), port);
-    }
-
     struct sockaddr_storage mkaddr(const char* address, uint16_t port)
     {
         struct sockaddr_storage storage;
@@ -133,35 +73,19 @@ namespace goofy::settings
         return storage;
     }
 
-    /* Covers all integer types using strto */
-    template <typename IntT>
-    void ConfItem<IntT>::parse_assign(const char* line, size_t len)
+} // anon namespace
+
+namespace goofy::settings
+{
+    Settings::BindAddr::BindAddr() :
+        sockaddr(mkaddr("::", 70)),
+        listen_backlog(10)
     {
-        try {
-            value = util::strto<IntT>(std::string(line, len));
-        }
-        catch(Error& e) {
-            throw goofy::ConfigError(
-                std::string("Invalid value for")
-                + name + ": " + e.what()
-            );
-        }
     }
 
-    template <>
-    size_t ConfItem<uint16_t>::store_to(std::FILE* f) const
+    void Settings::BindAddr::save_to(libconfig::Setting& group) const
     {
-        const int ret = std::fprintf(f, "%s %hu\n", name, value);
-        if (ret < 0) {
-            throw IOError("fprintf failure");
-        }
-        return size_t(ret);
-    }
-
-    template <>
-    size_t ConfItem<sockaddr_storage>::store_to(std::FILE* f) const
-    {
-        const sockaddr& addr = reinterpret_cast<const sockaddr&>(value);
+        const struct sockaddr& addr = reinterpret_cast<const struct sockaddr&>(sockaddr);
         const int af = addr.sa_family;
 
         in_port_t port;
@@ -185,74 +109,40 @@ namespace goofy::settings
             default:
                 assert(0); // did we invent more?
         }
-        port = ntohs(port);
 
         std::unique_ptr<char[]> buffer(new char[buflen]);
         const char* out = inet_ntop(af, parse_addr, buffer.get(), buflen);
         if (out == nullptr) {
-            throw ConfigError("Cannot serialize " + std::string(name), errno);
+            throw ConfigError("inet_ntop", errno);
         }
-        const int ret = std::fprintf(f, "%s %s %hu\n", name, out, port);
-        if (ret < 0) {
-            throw IOError("fprintf failure");
-        }
-        return size_t(ret);
+
+        group.add("address", libconfig::Setting::Type::TypeString) = out;
+        group.add("port", libconfig::Setting::Type::TypeInt) = ntohs(port);
+        group.add("listen_backlog", libconfig::Setting::Type::TypeInt) = int(listen_backlog);
     }
 
-    template <>
-    void ConfItem<sockaddr_storage>::parse_assign(const char* line, size_t len)
+    void Settings::BindAddr::load_from(const libconfig::Setting& group)
     {
-        std::string addr(line, len);
-        auto end = addr.find_first_of(" \t");
-        if (end == addr.npos) {
-            throw IOError("Invalid specification, missing port");
-        }
-        uint16_t port = util::strto<uint16_t>(addr.substr(end));
-        addr.resize(end);
-        value = mkaddr(addr, port);
+        sockaddr = mkaddr(
+            group.lookup("address"),
+            unsigned(group.lookup("port"))
+        );
+        listen_backlog = unsigned(group.lookup("listen_backlog"));
     }
 
-    template <>
-    size_t ConfItem<std::string>::store_to(std::FILE* f) const
+    Settings::Settings(const std::string& path)
     {
-        const int ret = std::fprintf(f, "%s %s\n", name, value.c_str());
-        if (ret < 0) {
-            throw IOError("fprintf failure");
-        }
-        return size_t(ret);
+        libconfig::Config cfg;
+        cfg.readFile(path.c_str());
+        auto& root = cfg.getRoot();
     }
 
-    template <>
-    void ConfItem<std::string>::parse_assign(const char* line, size_t len)
+    void Settings::save(const std::string& path)
     {
-        value = std::string(line, len);
-        value.pop_back();
-    }
-
-    template <>
-    size_t ConfItem<unsigned>::store_to(std::FILE* f) const
-    {
-        const int ret = std::fprintf(f, "%s %u\n", name, value);
-        if (ret < 0) {
-            throw IOError("fprintf failure");
-        }
-        return size_t(ret);
-    }
-
-    template <>
-    size_t ConfItem<bool>::store_to(std::FILE* f) const
-    {
-        const int ret = std::fprintf(f, "%s %s\n", name, value ? "yes" : "no");
-        if (ret < 0) {
-            throw IOError("fprintf failure");
-        }
-        return size_t(ret);
-    }
-
-    template <>
-    void ConfItem<bool>::parse_assign(const char* line, size_t len)
-    {
-        fprintf(stderr, "parse bool %s\n", std::string(line, len).c_str());
+        libconfig::Config cfg;
+        auto& root = cfg.getRoot();
+        bindaddr.save_to(root.add("bindaddr", BindAddr::LCType));
+        cfg.writeFile(path.c_str());
     }
 
 }

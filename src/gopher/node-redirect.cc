@@ -11,8 +11,8 @@ namespace goofy::gopher
             NodeType::NT_HYPERTEXT,
             "URL resolver",
             "URL:",
-            sets.host_name.read(),
-            sets.tcp_port.read()
+            sets.self.hostname,
+            sets.self.port
         ),
         settings(sets)
     {
