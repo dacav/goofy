@@ -119,6 +119,7 @@ namespace goofy::settings
         group.add("address", libconfig::Setting::Type::TypeString) = out;
         group.add("port", libconfig::Setting::Type::TypeInt) = ntohs(port);
         group.add("listen_backlog", libconfig::Setting::Type::TypeInt) = int(listen_backlog);
+        group.add("sock_reusable", libconfig::Setting::Type::TypeBoolean) = bool(sock_reusable);
     }
 
     void Settings::Network::load_from(const libconfig::Setting& group)
@@ -128,6 +129,7 @@ namespace goofy::settings
             unsigned(group.lookup("port"))
         );
         listen_backlog = unsigned(group.lookup("listen_backlog"));
+        sock_reusable = bool(group.lookup("sock_reusable"));
     }
 
     Settings::Settings(const std::string& path) :

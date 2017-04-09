@@ -25,7 +25,7 @@ namespace goofy::settings
 
             sockaddr_storage bind_address;
             unsigned listen_backlog;
-            bool sock_reusable; // TODO
+            bool sock_reusable;
         };
 
         Network network;
