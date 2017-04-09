@@ -182,12 +182,23 @@ namespace
         }
     }
 
+    goofy::settings::Settings tryload(const char* settings_path)
+    {
+        struct stat buf;
+        if (stat(settings_path, &buf) == 0) {
+            return goofy::settings::Settings(settings_path);
+        }
+        goofy::settings::Settings defaults;
+        defaults.save(settings_path);
+        return defaults;
+    }
+
 } // anon namespace
 
 int main(int argc, char **argv)
 {
     try {
-        goofy::settings::Settings settings;
+        goofy::settings::Settings settings = tryload("settings.conf");
         Server srv(settings);
 
         goofy::map_parser::Loader(

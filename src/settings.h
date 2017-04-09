@@ -39,8 +39,10 @@ namespace goofy::settings
         // Uses compile-time defaults
         Settings() = default;
         // Uses settings from file
+        Settings(const char* path);
         Settings(const std::string& path);
 
+        void save(const char* path);
         void save(const std::string& path);
     };
 

@@ -130,19 +130,30 @@ namespace goofy::settings
         listen_backlog = unsigned(group.lookup("listen_backlog"));
     }
 
-    Settings::Settings(const std::string& path)
+    Settings::Settings(const std::string& path) :
+        Settings(path.c_str())
     {
-        libconfig::Config cfg;
-        cfg.readFile(path.c_str());
-        auto& root = cfg.getRoot();
     }
 
-    void Settings::save(const std::string& path)
+    Settings::Settings(const char* path)
+    {
+        libconfig::Config cfg;
+        cfg.readFile(path);
+        auto& root = cfg.getRoot();
+        bindaddr.load_from(root.lookup("bindaddr"));
+    }
+
+    void Settings::save(const char* path)
     {
         libconfig::Config cfg;
         auto& root = cfg.getRoot();
         bindaddr.save_to(root.add("bindaddr", BindAddr::LCType));
-        cfg.writeFile(path.c_str());
+        cfg.writeFile(path);
+    }
+
+    void Settings::save(const std::string& path)
+    {
+        save(path.c_str());
     }
 
 }

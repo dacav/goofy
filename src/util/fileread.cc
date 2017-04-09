@@ -31,7 +31,7 @@ namespace goofy::util
     {
         input.reset(fopen(filename, "r"));
         if (input.get() == nullptr) {
-            throw IOError("fopen", errno);
+            throw IOError("fopen " + std::string(filename), errno);
         }
     }
 
