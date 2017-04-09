@@ -13,21 +13,24 @@ namespace goofy::settings
 {
     struct Settings
     {
-        struct BindAddr
+
+        /* Settings about network configuration */
+        struct Network
         {
-            BindAddr();
+            Network();
             void save_to(libconfig::Setting&) const;
             void load_from(const libconfig::Setting&);
 
             static const auto LCType = libconfig::Setting::Type::TypeGroup;
 
-            sockaddr_storage sockaddr;
+            sockaddr_storage bind_address;
             unsigned listen_backlog;
             bool sock_reusable; // TODO
         };
 
-        BindAddr bindaddr;
+        Network network;
 
+        /* How the server introduces itself over gopher */
         struct Self
         {
             std::string hostname;

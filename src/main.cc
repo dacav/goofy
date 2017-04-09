@@ -85,10 +85,10 @@ namespace
             Server::cb_accept,
             this,
             LEV_OPT_CLOSE_ON_FREE
-                | unsigned(settings.bindaddr.sock_reusable) * LEV_OPT_REUSEABLE,
-            settings.bindaddr.listen_backlog,
-            reinterpret_cast<const sockaddr *>(&settings.bindaddr.sockaddr),
-            sizeof(settings.bindaddr.sockaddr)
+                | unsigned(settings.network.sock_reusable) * LEV_OPT_REUSEABLE,
+            settings.network.listen_backlog,
+            reinterpret_cast<const sockaddr *>(&settings.network.bind_address),
+            sizeof(settings.network.bind_address)
         ));
         if (tcp_listener.get() == nullptr) {
             std::cerr << "Cannot listen: " << strerror(errno) << std::endl;

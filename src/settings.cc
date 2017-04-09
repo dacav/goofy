@@ -77,15 +77,15 @@ namespace
 
 namespace goofy::settings
 {
-    Settings::BindAddr::BindAddr() :
-        sockaddr(mkaddr("::", 70)),
+    Settings::Network::Network() :
+        bind_address(mkaddr("::", 70)),
         listen_backlog(10)
     {
     }
 
-    void Settings::BindAddr::save_to(libconfig::Setting& group) const
+    void Settings::Network::save_to(libconfig::Setting& group) const
     {
-        const struct sockaddr& addr = reinterpret_cast<const struct sockaddr&>(sockaddr);
+        const struct sockaddr& addr = reinterpret_cast<const struct sockaddr&>(bind_address);
         const int af = addr.sa_family;
 
         in_port_t port;
@@ -121,9 +121,9 @@ namespace goofy::settings
         group.add("listen_backlog", libconfig::Setting::Type::TypeInt) = int(listen_backlog);
     }
 
-    void Settings::BindAddr::load_from(const libconfig::Setting& group)
+    void Settings::Network::load_from(const libconfig::Setting& group)
     {
-        sockaddr = mkaddr(
+        bind_address = mkaddr(
             group.lookup("address"),
             unsigned(group.lookup("port"))
         );
@@ -140,14 +140,14 @@ namespace goofy::settings
         libconfig::Config cfg;
         cfg.readFile(path);
         auto& root = cfg.getRoot();
-        bindaddr.load_from(root.lookup("bindaddr"));
+        network.load_from(root.lookup("network"));
     }
 
     void Settings::save(const char* path)
     {
         libconfig::Config cfg;
         auto& root = cfg.getRoot();
-        bindaddr.save_to(root.add("bindaddr", BindAddr::LCType));
+        network.save_to(root.add("network", Network::LCType));
         cfg.writeFile(path);
     }
 
