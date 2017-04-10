@@ -132,6 +132,24 @@ namespace goofy::settings
         sock_reusable = bool(group.lookup("sock_reusable"));
     }
 
+    Settings::Self::Self() :
+        hostname("localhost"),
+        port(70)
+    {
+    }
+
+    void Settings::Self::load_from(const libconfig::Setting& group)
+    {
+        hostname = (const char*) group.lookup("hostname");
+        port = unsigned(group.lookup("port"));
+    }
+
+    void Settings::Self::save_to(libconfig::Setting& group) const
+    {
+        group.add("hostname", libconfig::Setting::Type::TypeString) = hostname;
+        group.add("port", libconfig::Setting::Type::TypeInt) = port;
+    }
+
     Settings::Settings(const std::string& path) :
         Settings(path.c_str())
     {
@@ -143,6 +161,7 @@ namespace goofy::settings
         cfg.readFile(path);
         auto& root = cfg.getRoot();
         network.load_from(root.lookup("network"));
+        self.load_from(root.lookup("server"));
     }
 
     void Settings::save(const char* path)
@@ -150,6 +169,7 @@ namespace goofy::settings
         libconfig::Config cfg;
         auto& root = cfg.getRoot();
         network.save_to(root.add("network", Network::LCType));
+        self.save_to(root.add("server", Self::LCType));
         cfg.writeFile(path);
     }
 

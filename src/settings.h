@@ -17,26 +17,30 @@ namespace goofy::settings
         /* Settings about network configuration */
         struct Network
         {
-            Network();
-            void save_to(libconfig::Setting&) const;
-            void load_from(const libconfig::Setting&);
-
-            static const auto LCType = libconfig::Setting::Type::TypeGroup;
-
             sockaddr_storage bind_address;
             unsigned listen_backlog;
             bool sock_reusable;
+
+            Network();
+            void save_to(libconfig::Setting&) const;
+            void load_from(const libconfig::Setting&);
+            static const auto LCType = libconfig::Setting::Type::TypeGroup;
         };
 
-        Network network;
 
         /* How the server introduces itself over gopher */
         struct Self
         {
             std::string hostname;
             uint16_t port;
+
+            Self();
+            void save_to(libconfig::Setting&) const;
+            void load_from(const libconfig::Setting&);
+            static const auto LCType = libconfig::Setting::Type::TypeGroup;
         };
 
+        Network network;
         Self self;
 
         // Uses compile-time defaults
