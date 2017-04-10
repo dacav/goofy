@@ -16,6 +16,12 @@ namespace goofy::util
     {
     }
 
+    Reader::Reader(const std::string& filename) :
+        Reader()
+    {
+        feed(filename);
+    }
+
     void Reader::feed(const std::string& filename)
     {
         feed(filename.c_str());
@@ -25,7 +31,7 @@ namespace goofy::util
     {
         input.reset(fopen(filename, "r"));
         if (input.get() == nullptr) {
-            throw IOError("fopen", errno);
+            throw IOError("fopen " + std::string(filename), errno);
         }
     }
 

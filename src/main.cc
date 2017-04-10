@@ -79,15 +79,16 @@ namespace
         tcp_listener(nullptr, evconnlistener_free),
         sighandler(nullptr, event_free)
     {
+        errno = 0;
         tcp_listener.reset(evconnlistener_new_bind(
             base_event.get(),
             Server::cb_accept,
             this,
             LEV_OPT_CLOSE_ON_FREE
-                | unsigned(settings.sock_reusable) * LEV_OPT_REUSEABLE,
-            settings.accept_backlog,
-            reinterpret_cast<const sockaddr *>(&settings.bind_addr),
-            sizeof(settings.bind_addr)
+                | unsigned(settings.network.sock_reusable) * LEV_OPT_REUSEABLE,
+            settings.network.listen_backlog,
+            reinterpret_cast<const sockaddr *>(&settings.network.bind_address),
+            sizeof(settings.network.bind_address)
         ));
         if (tcp_listener.get() == nullptr) {
             std::cerr << "Cannot listen: " << strerror(errno) << std::endl;
@@ -181,27 +182,31 @@ namespace
         }
     }
 
+    goofy::settings::Settings tryload(const char* settings_path)
+    {
+        struct stat buf;
+        if (stat(settings_path, &buf) == 0) {
+            return goofy::settings::Settings(settings_path);
+        }
+        goofy::settings::Settings defaults;
+        defaults.save(settings_path);
+        return defaults;
+    }
+
 } // anon namespace
 
 int main(int argc, char **argv)
 {
-    goofy::settings::Settings settings;
-    settings.listen_port = 7070;
-    settings.bind_addr = goofy::settings::mkaddr("::1", settings.listen_port);
-    settings.accept_backlog = 10;
-    settings.sock_reusable = true;
-    settings.host_name = "localhost";
-
-    Server srv(settings);
-
-    goofy::map_parser::Loader(
-        settings,
-        srv.gopher_map,
-        srv.type_guesser,
-        "root.gophermap"
-    );
-
     try {
+        goofy::settings::Settings settings = tryload("settings.conf");
+        Server srv(settings);
+
+        goofy::map_parser::Loader(
+            settings,
+            srv.gopher_map,
+            srv.type_guesser
+        );
+
         srv.start();
     }
     catch (int ret) {
