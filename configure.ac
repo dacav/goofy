@@ -21,20 +21,24 @@ AC_SEARCH_LIBS([magic_open], [magic], [],
 PKG_CHECK_MODULES([event], [libevent >= 2.0.0])
 PKG_CHECK_MODULES([config], [libconfig++ >= 1.5])
 
-dnl  Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h sys/socket.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h sys/socket.h syslog.h unistd.h])
 
-dnl  Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
+AC_TYPE_INT16_T
+AC_TYPE_INT32_T
+AC_TYPE_INT64_T
+AC_TYPE_INT8_T
 AC_TYPE_MODE_T
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT64_T
+AC_TYPE_UINT8_T
 
-dnl  Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
-AC_CHECK_FUNCS([memchr memset strerror strstr strtoul])
+AC_CHECK_FUNCS([memchr memset strerror strstr])
 
 AC_CONFIG_FILES([Makefile] [src/Makefile] [tests/Makefile])
 AC_OUTPUT
