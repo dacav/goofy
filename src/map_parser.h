@@ -70,8 +70,7 @@ namespace goofy::map_parser
             Loader(
                 const settings::Settings& settings,
                 gopher::Map& gopher_map,
-                const gopher::GopherTypeGuesser& type_guesser,
-                const std::string& filename
+                const gopher::GopherTypeGuesser& type_guesser
             );
 
         private:

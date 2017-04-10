@@ -204,8 +204,7 @@ int main(int argc, char **argv)
         goofy::map_parser::Loader(
             settings,
             srv.gopher_map,
-            srv.type_guesser,
-            "root.gophermap"
+            srv.type_guesser
         );
 
         srv.start();

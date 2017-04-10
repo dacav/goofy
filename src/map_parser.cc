@@ -110,8 +110,7 @@ namespace goofy::map_parser
     Loader::Loader(
             const settings::Settings& sets,
             gopher::Map& gm,
-            const gopher::GopherTypeGuesser& tg,
-            const std::string& filename) :
+            const gopher::GopherTypeGuesser& tg) :
         settings(sets),
         gopher_map(gm),
         type_guesser(tg),
@@ -124,12 +123,13 @@ namespace goofy::map_parser
             )
         )
     {
-        file_reader.feed(filename);
+        const std::string& root = settings.content.root_gophermap;
+        file_reader.feed(root);
 
-        gopher_map.paths_map.define(filename, ""); // root entry
+        gopher_map.paths_map.define(root, ""); // root entry
         gopher_map.lookup_map.mknode<gopher::NodeGopherMap>(
             gopher_map.paths_map,
-            filename
+            root
         );
         scan();
 

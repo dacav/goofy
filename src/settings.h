@@ -24,7 +24,6 @@ namespace goofy::settings
             Network();
             void save_to(libconfig::Setting&) const;
             void load_from(const libconfig::Setting&);
-            static const auto LCType = libconfig::Setting::Type::TypeGroup;
         };
 
 
@@ -37,10 +36,19 @@ namespace goofy::settings
             Self();
             void save_to(libconfig::Setting&) const;
             void load_from(const libconfig::Setting&);
-            static const auto LCType = libconfig::Setting::Type::TypeGroup;
+        };
+
+        struct Content
+        {
+            std::string root_gophermap;
+
+            Content();
+            void save_to(libconfig::Setting&) const;
+            void load_from(const libconfig::Setting&);
         };
 
         Network network;
+        Content content;
         Self self;
 
         // Uses compile-time defaults

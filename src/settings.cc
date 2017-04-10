@@ -73,6 +73,8 @@ namespace
         return storage;
     }
 
+    using LCType = libconfig::Setting::Type;
+
 } // anon namespace
 
 namespace goofy::settings
@@ -146,8 +148,23 @@ namespace goofy::settings
 
     void Settings::Self::save_to(libconfig::Setting& group) const
     {
-        group.add("hostname", libconfig::Setting::Type::TypeString) = hostname;
-        group.add("port", libconfig::Setting::Type::TypeInt) = port;
+        group.add("hostname", LCType::TypeString) = hostname;
+        group.add("port", LCType::TypeInt) = port;
+    }
+
+    Settings::Content::Content() :
+        root_gophermap("path/to/gophermap")
+    {
+    }
+
+    void Settings::Content::save_to(libconfig::Setting& group) const
+    {
+        group.add("root_gophermap", LCType::TypeString) = root_gophermap;
+    }
+
+    void Settings::Content::load_from(const libconfig::Setting& group)
+    {
+        root_gophermap = (const char*)group.lookup("root_gophermap");
     }
 
     Settings::Settings(const std::string& path) :
@@ -162,14 +179,16 @@ namespace goofy::settings
         auto& root = cfg.getRoot();
         network.load_from(root.lookup("network"));
         self.load_from(root.lookup("server"));
+        content.load_from(root.lookup("content"));
     }
 
     void Settings::save(const char* path)
     {
         libconfig::Config cfg;
         auto& root = cfg.getRoot();
-        network.save_to(root.add("network", Network::LCType));
-        self.save_to(root.add("server", Self::LCType));
+        network.save_to(root.add("network", LCType::TypeGroup));
+        self.save_to(root.add("server", LCType::TypeGroup));
+        content.save_to(root.add("content", LCType::TypeGroup));
         cfg.writeFile(path);
     }
 
